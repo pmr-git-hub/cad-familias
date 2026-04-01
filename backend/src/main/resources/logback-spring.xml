@@ -1,0 +1,15 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%highlight(%-5level) %cyan(%d{HH:mm:ss.SSS}) %magenta([%thread]) %green(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.hibernate.SQL" level="debug"/>
+    <logger name="org.hibernate.orm.jdbc.bind" level="trace"/>
+    <logger name="org.hibernate.type.descriptor.jdbc" level="trace"/>
+
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

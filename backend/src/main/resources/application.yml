@@ -1,12 +1,12 @@
 spring:
   application:
-    name: cad-ribeirao-api
+    name: cad-familias
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/cad_ribeirao?useTimezone=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/cad_familias?useTimezone=true&serverTimezone=UTC
     username: ${DATABASE_USERNAME:root}
     password: ${DATABASE_PASSWORD:admin123}
 
@@ -33,6 +33,16 @@ jwt:
   secret: ${JWT_SECRET:dev-secret-trocar-em-producao}
   expiration: 3600000
   refresh-expiration: 604800000
+
+# Identidade do município — o que aparece na tela
+tenant:
+  nome: Ribeirão Pires
+  estado: SP
+  prefeitura: Prefeitura Municipal de Ribeirão Pires
+  secretaria: Secretaria de Assistência Social
+  logo: /assets/logo-ribeirao.png
+  cor-primaria: "#1A3E6F"
+  cor-secundaria: "#F5A623"
 
 logging:
   level:

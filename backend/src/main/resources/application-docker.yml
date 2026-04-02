@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATABASE_URL:jdbc:mysql://mysql:3306/cad_ribeirao?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    url: ${DATABASE_URL:jdbc:mysql://mysql:3306/cad_familias?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
     username: ${DATABASE_USERNAME:root}
     password: ${DATABASE_PASSWORD:}
 
@@ -18,13 +18,26 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+# CORS — injetado via @Value no FiltroTokenAcesso
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allow-headers: authtoken, refreshtoken, Content-Type
+  allow-methods: GET, POST, PUT, DELETE, OPTIONS
 
 jwt:
   secret: ${JWT_SECRET}
   expiration: 3600000
   refresh-expiration: 604800000
+
+# Identidade do município — sobrescreva via env var em cada deploy
+tenant:
+  nome: ${TENANT_NOME:Ribeirão Pires}
+  estado: ${TENANT_ESTADO:SP}
+  prefeitura: ${TENANT_PREFEITURA:Prefeitura Municipal de Ribeirão Pires}
+  secretaria: ${TENANT_SECRETARIA:Secretaria de Assistência Social}
+  logo: ${TENANT_LOGO:/assets/logo-ribeirao.png}
+  cor-primaria: ${TENANT_COR_PRIMARIA:#1A3E6F}
+  cor-secundaria: ${TENANT_COR_SECUNDARIA:#F5A623}
 
 logging:
   level:

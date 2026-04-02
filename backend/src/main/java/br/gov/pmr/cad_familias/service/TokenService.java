@@ -1,7 +1,7 @@
 package br.gov.pmr.cad_familias.service;
 
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
-import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
+import br.gov.pmr.cad_familias.excecao.TokenInvalidoException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -18,64 +18,53 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
+    private static final String ISSUER = "Cad Familias";
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    private final UsuarioRepository usuarioRepository;
-
-    public TokenService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
-
-    public String gerarToken(Usuario usuario){
+    public String gerarToken(Usuario usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
             return JWT.create()
-                    .withIssuer("Cad famlias")
+                    .withIssuer(ISSUER)
                     .withSubject(usuario.getUsername())
                     .withExpiresAt(expiracao(480))
                     .sign(algorithm);
-        } catch (JWTCreationException e){
-            e.printStackTrace();//TODO TRATAR COM EXCEÇÃO ADEQUADA
+        } catch (JWTCreationException e) {
+            throw new TokenInvalidoException("Erro ao gerar token de acesso.");
         }
-        return null;
     }
 
     public String gerarRefreshToken(Usuario usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
             return JWT.create()
-                    .withIssuer("Cad famlias")
+                    .withIssuer(ISSUER)
                     .withSubject(usuario.getId().toString())
                     .withExpiresAt(expiracao(10080))
                     .sign(algorithm);
-        } catch (JWTCreationException e){
-            e.printStackTrace();//TODO TRATAR COM EXCEÇÃO ADEQUADA
+        } catch (JWTCreationException e) {
+            throw new TokenInvalidoException("Erro ao gerar refresh token.");
         }
-        return null;
+    }
+
+    public String validarToken(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+        JWTVerifier verifier = JWT.require(algorithm)
+                .withIssuer(ISSUER)
+                .build();
+        DecodedJWT decodedJWT = verifier.verify(token);
+        return decodedJWT.getSubject();
+    }
+
+    public boolean isTokenExpirado(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        return decodedJWT.getExpiresAt() != null
+                && decodedJWT.getExpiresAt().before(new java.util.Date());
     }
 
     private Instant expiracao(Integer minutos) {
         return LocalDateTime.now().plusMinutes(minutos).toInstant(ZoneOffset.of("-03:00"));
-    }
-
-    public String validarToken(String token) throws JWTVerificationException{
-        DecodedJWT decodedJWT;
-        Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-        JWTVerifier verifier = JWT.require(algorithm)
-                .withIssuer("Cad famlias")
-                .build();
-        decodedJWT = verifier.verify(token);
-        return decodedJWT.getSubject();
-    }
-
-    public boolean isTokenExpirado(String token) throws JWTVerificationException {
-        DecodedJWT decodedJWT = JWT.decode(token);
-        if (decodedJWT.getExpiresAt() != null && decodedJWT.getExpiresAt().before(new java.util.Date())) {
-            return true;
-        }else {
-            return false;
-        }
-
     }
 }

@@ -3,6 +3,7 @@ package br.gov.pmr.cad_familias.domain.usuario;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
@@ -67,7 +68,8 @@ public class Usuario implements UserDetails, Serializable {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of();
+		if (this.perfil == null) return List.of();
+		return List.of(new SimpleGrantedAuthority(this.perfil.name()));
 	}
 
 	@Override

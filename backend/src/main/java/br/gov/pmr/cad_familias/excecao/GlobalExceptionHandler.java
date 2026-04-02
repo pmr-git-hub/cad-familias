@@ -35,5 +35,29 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.FOUND)
                 .body(errorResponse);
     }
+    @ExceptionHandler(TecnicoNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handlerTecnicoNaoEncontrada(TecnicoNaoEncontradoException exception){
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FOUND.value(),
+                "Técnico não encontrado.",
+                exception.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .body(errorResponse);
+    }
+    @ExceptionHandler(TokenInvalidoException.class)
+    public ResponseEntity<ErrorResponse> handlerTokenInvalido(TokenInvalidoException exception){
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FOUND.value(),
+                "Token inválido.",
+                exception.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .body(errorResponse);
+    }
 }
 

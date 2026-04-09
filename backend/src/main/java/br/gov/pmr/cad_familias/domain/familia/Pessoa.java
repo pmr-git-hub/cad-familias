@@ -11,13 +11,14 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "pessoa")
+@Setter
+@Getter
 public class Pessoa implements Serializable {
-
-	private static final long serialVersionUID = -1490668826956617287L;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -96,63 +97,6 @@ public class Pessoa implements Serializable {
 		if (this.dataNascimento == null) return 0;
 		return Period.between(this.dataNascimento, LocalDate.now()).getYears();
 	}
-
-	public Long getId() { return id; }
-	public void setId(Long id) { this.id = id; }
-
-	public Familia getFamilia() { return familia; }
-	public void setFamilia(Familia familia) { this.familia = familia; }
-
-	public String getNome() { return nome; }
-	public void setNome(String nome) { this.nome = nome; }
-
-	public String getCpf() { return cpf; }
-	public void setCpf(String cpf) { this.cpf = cpf; }
-
-	public String getNis() { return nis; }
-	public void setNis(String nis) { this.nis = nis; }
-
-	public String getNumeroRg() { return numeroRg; }
-	public void setNumeroRg(String numeroRg) { this.numeroRg = numeroRg; }
-
-	public String getOrgaoExpeditorRg() { return orgaoExpeditorRg; }
-	public void setOrgaoExpeditorRg(String orgaoExpeditorRg) { this.orgaoExpeditorRg = orgaoExpeditorRg; }
-
-	public LocalDate getDataExpedicaoRg() { return dataExpedicaoRg; }
-	public void setDataExpedicaoRg(LocalDate dataExpedicaoRg) { this.dataExpedicaoRg = dataExpedicaoRg; }
-
-	public LocalDate getDataNascimento() { return dataNascimento; }
-	public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
-
-	public boolean isReferencia() { return isReferencia; }
-	public void setReferencia(boolean isReferencia) { this.isReferencia = isReferencia; }
-
-	public Parentesco getParentesco() { return parentesco; }
-	public void setParentesco(Parentesco parentesco) { this.parentesco = parentesco; }
-
-	public String getTelefone() { return telefone; }
-	public void setTelefone(String telefone) { this.telefone = telefone; }
-
-	public Sexo getSexo() { return sexo; }
-	public void setSexo(Sexo sexo) { this.sexo = sexo; }
-
-	public Long getRendaMensal() { return rendaMensal; }
-	public void setRendaMensal(Long rendaMensal) { this.rendaMensal = rendaMensal; }
-
-	public Endereco getEndereco() { return endereco; }
-	public void setEndereco(Endereco endereco) { this.endereco = endereco; }
-
-	public LocalDateTime getCriadoEm() { return criadoEm; }
-	public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
-
-	public Long getCriadoPor() { return criadoPor; }
-	public void setCriadoPor(Long criadoPor) { this.criadoPor = criadoPor; }
-
-	public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
-	public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
-
-	public Long getAtualizadoPor() { return atualizadoPor; }
-	public void setAtualizadoPor(Long atualizadoPor) { this.atualizadoPor = atualizadoPor; }
 
 	@Override
 	public int hashCode() { return Objects.hash(id); }

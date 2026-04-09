@@ -2,16 +2,17 @@ package br.gov.pmr.cad_familias.domain.tecnico;
 
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tecnico")
+@Getter
+@Setter
 public class Tecnico implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,37 +58,4 @@ public class Tecnico implements Serializable {
     public void preUpdate() {
         this.atualizadoEm = LocalDateTime.now();
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
-
-    public String getRegistroProfissional() { return registroProfissional; }
-    public void setRegistroProfissional(String registroProfissional) { this.registroProfissional = registroProfissional; }
-
-    public Especialidade getEspecialidade() { return especialidade; }
-    public void setEspecialidade(Especialidade especialidade) { this.especialidade = especialidade; }
-
-    public Equipamento getEquipamento() { return equipamento; }
-    public void setEquipamento(Equipamento equipamento) { this.equipamento = equipamento; }
-
-    public boolean isAtivo() { return ativo; }
-    public void setAtivo(boolean ativo) { this.ativo = ativo; }
-
-    public LocalDateTime getCriadoEm() { return criadoEm; }
-    public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
-
-    public Long getCriadoPor() { return criadoPor; }
-    public void setCriadoPor(Long criadoPor) { this.criadoPor = criadoPor; }
-
-    public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
-    public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
-
-    public Long getAtualizadoPor() { return atualizadoPor; }
-    public void setAtualizadoPor(Long atualizadoPor) { this.atualizadoPor = atualizadoPor; }
 }

@@ -10,8 +10,6 @@ import java.io.Serializable;
 @Getter
 public class TecnicoDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     private Long id;
     private String nome;
     private String cpf;

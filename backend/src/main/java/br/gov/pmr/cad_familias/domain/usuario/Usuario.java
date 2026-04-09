@@ -19,8 +19,6 @@ import java.util.List;
 @Getter
 public class Usuario implements UserDetails, Serializable {
 
-	private static final long serialVersionUID = 1L;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

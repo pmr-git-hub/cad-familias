@@ -19,4 +19,8 @@ public class EquipamentoAtualizacaoDTO {
     private String telefone;
     private String email;
     private Boolean ativo;
+
+    public Boolean isAtivo() {
+        return ativo;
+    }
 }

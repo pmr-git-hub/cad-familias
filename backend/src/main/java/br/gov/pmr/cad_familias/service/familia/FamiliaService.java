@@ -113,7 +113,7 @@ public class FamiliaService {
 			atualizarDadosPessoa(referenciaAtual, referenciaEditada);
 			referenciaAtual.setAtualizadoPor(usuarioId);
 
-			// Substitui membros não-referência
+			// Substitui membros não referência
 			familiaAtual.getMembrosDaFamilia().removeIf(p -> !p.isReferencia());
 
 			novosMembros.stream()

@@ -1,4 +1,4 @@
-package br.gov.pmr.cad_familias.service;
+package br.gov.pmr.cad_familias.service.auth;
 
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.excecao.TokenInvalidoException;
@@ -6,7 +6,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer(ISSUER)
                     .withSubject(usuario.getUsername())
+                    .withClaim("usuarioId", usuario.getId()) // Claim personalizado
                     .withExpiresAt(expiracao(480))
                     .sign(algorithm);
         } catch (JWTCreationException e) {
@@ -42,6 +42,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer(ISSUER)
                     .withSubject(usuario.getId().toString())
+                    .withClaim("usuarioId", usuario.getId())
                     .withExpiresAt(expiracao(10080))
                     .sign(algorithm);
         } catch (JWTCreationException e) {
@@ -66,5 +67,10 @@ public class TokenService {
 
     private Instant expiracao(Integer minutos) {
         return LocalDateTime.now().plusMinutes(minutos).toInstant(ZoneOffset.of("-03:00"));
+    }
+
+    public Long getUsuarioIdDoToken(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        return decodedJWT.getClaim("usuarioId").asLong();
     }
 }

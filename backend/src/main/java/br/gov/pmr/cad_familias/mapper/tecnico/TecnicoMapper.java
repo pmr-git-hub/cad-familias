@@ -1,6 +1,6 @@
 package br.gov.pmr.cad_familias.mapper.tecnico;
 
-import br.gov.pmr.cad_familias.VO.tecnico.TecnicoVO;
+import br.gov.pmr.cad_familias.dto.tecnico.TecnicoDTO;
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 
@@ -8,10 +8,10 @@ import java.util.List;
 
 public class TecnicoMapper {
 
-    public static TecnicoVO tecnicoToTecnicoVO(Tecnico tecnico) {
+    public static TecnicoDTO tecnicoToTecnicoVO(Tecnico tecnico) {
         if (tecnico == null) return null;
 
-        TecnicoVO vo = new TecnicoVO();
+        TecnicoDTO vo = new TecnicoDTO();
         vo.setId(tecnico.getId());
         vo.setNome(tecnico.getNome());
         vo.setCpf(tecnico.getCpf());
@@ -27,7 +27,7 @@ public class TecnicoMapper {
         return vo;
     }
 
-    public static Tecnico tecnicoVOToTecnico(TecnicoVO vo, Equipamento equipamento) {
+    public static Tecnico tecnicoVOToTecnico(TecnicoDTO vo, Equipamento equipamento) {
         if (vo == null) return null;
 
         Tecnico tecnico = new Tecnico();
@@ -42,7 +42,7 @@ public class TecnicoMapper {
         return tecnico;
     }
 
-    public static List<TecnicoVO> listaTecnicosToVO(List<Tecnico> tecnicos) {
+    public static List<TecnicoDTO> listaTecnicosToVO(List<Tecnico> tecnicos) {
         return tecnicos.stream()
                 .map(TecnicoMapper::tecnicoToTecnicoVO)
                 .toList();

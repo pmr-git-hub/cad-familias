@@ -4,8 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import br.gov.pmr.cad_familias.VO.familia.FamiliaVO;
-import br.gov.pmr.cad_familias.VO.familia.PessoaVO;
+import br.gov.pmr.cad_familias.dto.familia.FamiliaDTO;
 import br.gov.pmr.cad_familias.domain.familia.Endereco;
 import br.gov.pmr.cad_familias.domain.familia.Familia;
 import br.gov.pmr.cad_familias.domain.familia.Pessoa;
@@ -23,59 +22,120 @@ public class FamiliaService {
 		this.repositorioFamilia = repositorioFamilia;
 	}
 
-	@Transactional
-	public FamiliaVO salvar(FamiliaVO familiaVO) {
-		Familia familia = FamiliaMapper.familiaVoToFamilia(familiaVO);
-		return FamiliaMapper.familiaToFamiliaVo(repositorioFamilia.save(familia));
-	}
-
-	public List<FamiliaVO> listarFamilias() {
+	public List<FamiliaDTO> listarFamilias() {
 		return FamiliaMapper.listaFamiliasToListaFamiliasVO(repositorioFamilia.findAll());
 	}
 
-	@Transactional
-	public FamiliaVO editarFamilia(Long id, FamiliaVO familiaEditar) {
-		Familia familiaAtual = repositorioFamilia.findById(id)
+	public FamiliaDTO buscarPorId(Long id) {
+		Familia familia = repositorioFamilia.findById(id)
 				.orElseThrow(FamiliaNaoEncontradaException::new);
+		return FamiliaMapper.familiaToFamiliaVo(familia);
+	}
 
-		Familia familiaConvertida = FamiliaMapper.familiaVoToFamilia(familiaEditar);
-		List<Pessoa> novosMembros = familiaConvertida.getMembrosDaFamilia();
+	@Transactional
+	public FamiliaDTO salvar(FamiliaDTO familiaDTO, Long usuarioId) {
+		Familia familia = FamiliaMapper.familiaVoToFamilia(familiaDTO);
 
-		// Valida que existe exatamente uma referência
-		long countReferencias = novosMembros.stream().filter(Pessoa::isReferencia).count();
+		// Validação: exatamente uma pessoa de referência
+		long countReferencias = familia.getMembrosDaFamilia().stream()
+				.filter(Pessoa::isReferencia).count();
 		if (countReferencias != 1) {
 			throw new IllegalArgumentException("A família deve ter exatamente uma pessoa de referência.");
 		}
 
-		// Atualiza a pessoa de referência
-		Pessoa referenciaEditada = novosMembros.stream()
+		// Validação: pessoa de referência deve ter endereço
+		Pessoa referencia = familia.getMembrosDaFamilia().stream()
 				.filter(Pessoa::isReferencia)
 				.findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Pessoa de referência não encontrada."));
 
-		Pessoa referenciaAtual = familiaAtual.getMembrosDaFamilia().stream()
-				.filter(Pessoa::isReferencia)
-				.findFirst()
-				.orElseThrow(() -> new IllegalStateException("Família sem pessoa de referência."));
+		if (referencia.getEndereco() == null || referencia.getEndereco().getLogradouro() == null) {
+			throw new IllegalArgumentException("A pessoa de referência deve ter endereço preenchido.");
+		}
 
-		atualizarDadosPessoa(referenciaAtual, referenciaEditada);
+		// Validação: pessoa de referência não tem parentesco
+		referencia.setParentesco(null);
 
-		// Substitui membros não-referência
-		familiaAtual.getMembrosDaFamilia().removeIf(p -> !p.isReferencia());
+		// Auditoria
+		familia.setCriadoPor(usuarioId);
+		familia.getMembrosDaFamilia().forEach(membro -> {
+			membro.setCriadoPor(usuarioId);
+		});
 
-		novosMembros.stream()
-				.filter(p -> !p.isReferencia())
-				.forEach(novo -> {
-					novo.setFamilia(familiaAtual);
-					familiaAtual.getMembrosDaFamilia().add(novo);
-				});
+		return FamiliaMapper.familiaToFamiliaVo(repositorioFamilia.save(familia));
+	}
+
+	@Transactional
+	public FamiliaDTO editarFamilia(Long id, FamiliaDTO familiaEditar, Long usuarioId) {
+		Familia familiaAtual = repositorioFamilia.findById(id)
+				.orElseThrow(FamiliaNaoEncontradaException::new);
+
+		// === 1. Atualiza campos simples da família (parcial) ===
+		if (familiaEditar.getCodigoCadunico() != null) {
+			familiaAtual.setCodigoCadunico(familiaEditar.getCodigoCadunico());
+		}
+		if (familiaEditar.getSituacao() != null) {
+			familiaAtual.setSituacao(familiaEditar.getSituacao());
+		}
+
+		// === 2. Só atualiza membros se veio pessoaReferencia no DTO ===
+		boolean temAtualizacaoDeMembros = familiaEditar.getPessoaReferencia() != null;
+
+		if (temAtualizacaoDeMembros) {
+			Familia familiaConvertida = FamiliaMapper.familiaVoToFamilia(familiaEditar);
+			List<Pessoa> novosMembros = familiaConvertida.getMembrosDaFamilia();
+
+			// Valida que existe exatamente uma referência
+			long countReferencias = novosMembros.stream().filter(Pessoa::isReferencia).count();
+			if (countReferencias != 1) {
+				throw new IllegalArgumentException("A família deve ter exatamente uma pessoa de referência.");
+			}
+
+			// Atualiza a pessoa de referência
+			Pessoa referenciaEditada = novosMembros.stream()
+					.filter(Pessoa::isReferencia)
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException("Pessoa de referência não encontrada."));
+
+			// Validação: endereço obrigatório
+			if (referenciaEditada.getEndereco() == null || referenciaEditada.getEndereco().getLogradouro() == null) {
+				throw new IllegalArgumentException("A pessoa de referência deve ter endereço preenchido.");
+			}
+
+			// Pessoa de referência não tem parentesco
+			referenciaEditada.setParentesco(null);
+
+			Pessoa referenciaAtual = familiaAtual.getMembrosDaFamilia().stream()
+					.filter(Pessoa::isReferencia)
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("Família sem pessoa de referência."));
+
+			atualizarDadosPessoa(referenciaAtual, referenciaEditada);
+			referenciaAtual.setAtualizadoPor(usuarioId);
+
+			// Substitui membros não-referência
+			familiaAtual.getMembrosDaFamilia().removeIf(p -> !p.isReferencia());
+
+			novosMembros.stream()
+					.filter(p -> !p.isReferencia())
+					.forEach(novo -> {
+						novo.setFamilia(familiaAtual);
+						novo.setCriadoPor(usuarioId);
+						familiaAtual.getMembrosDaFamilia().add(novo);
+					});
+		}
+
+		// Auditoria da família
+		familiaAtual.setAtualizadoPor(usuarioId);
 
 		return FamiliaMapper.familiaToFamiliaVo(repositorioFamilia.save(familiaAtual));
 	}
 
+
 	private void atualizarDadosPessoa(Pessoa existente, Pessoa editada) {
 		existente.setNome(editada.getNome());
 		existente.setCpf(editada.getCpf());
+		existente.setNis(editada.getNis());
 		existente.setTelefone(editada.getTelefone());
 		existente.setSexo(editada.getSexo());
 		existente.setParentesco(editada.getParentesco());
@@ -103,3 +163,4 @@ public class FamiliaService {
 		existente.setLocalizacaoDomicilio(editado.getLocalizacaoDomicilio());
 	}
 }
+

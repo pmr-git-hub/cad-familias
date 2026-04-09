@@ -1,7 +1,7 @@
-package br.gov.pmr.cad_familias.service.usuario;
+package br.gov.pmr.cad_familias.service.auth;
 
-import br.gov.pmr.cad_familias.VO.usuario.CriarUsuarioDTO;
-import br.gov.pmr.cad_familias.VO.usuario.UsuarioVO;
+import br.gov.pmr.cad_familias.dto.usuario.CriarUsuarioDTO;
+import br.gov.pmr.cad_familias.dto.usuario.UsuarioDTO;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
@@ -32,12 +32,12 @@ public class UsuarioService implements UserDetailsService {
 		this.encoder = encoder;
 	}
 
-	public List<UsuarioVO> listarUsuarios() {
+	public List<UsuarioDTO> listarUsuarios() {
 		return UsuarioMapper.listaUsuariosToVO(usuarioRepository.findAll());
 	}
 
 	@Transactional
-	public UsuarioVO criarUsuario(CriarUsuarioDTO dto) {
+	public UsuarioDTO criarUsuario(CriarUsuarioDTO dto) {
 		Tecnico tecnico = tecnicoRepository.findById(dto.getTecnicoId())
 				.orElseThrow(TecnicoNaoEncontradoException::new);
 

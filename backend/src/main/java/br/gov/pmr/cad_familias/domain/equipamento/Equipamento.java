@@ -1,12 +1,18 @@
 package br.gov.pmr.cad_familias.domain.equipamento;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "equipamento")
+@Setter
+@Getter
 public class Equipamento implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -15,6 +21,8 @@ public class Equipamento implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Size(max = 300)
     @Column(nullable = false, length = 300)
     private String nome;
 
@@ -22,8 +30,41 @@ public class Equipamento implements Serializable {
     @Column(nullable = false)
     private TipoEquipamento tipo;
 
+    @Size(max = 9)
+    @Column(length = 9)
+    private String cep;
+
+    @Size(max = 255)
     @Column
-    private String endereco;
+    private String logradouro;
+
+    @Size(max = 20)
+    @Column
+    private String numero;
+
+    @Size(max = 255)
+    @Column
+    private String complemento;
+
+    @Size(max = 255)
+    @Column
+    private String bairro;
+
+    @Size(max = 255)
+    @Column
+    private String cidade;
+
+    @Size(max = 2)
+    @Column(length = 2)
+    private String estado;
+
+    @Size(max = 20)
+    @Column
+    private String telefone;
+
+    @Size(max = 255)
+    @Column
+    private String email;
 
     @Column(nullable = false)
     private boolean ativo = true;
@@ -50,30 +91,4 @@ public class Equipamento implements Serializable {
         this.atualizadoEm = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-
-    public TipoEquipamento getTipo() { return tipo; }
-    public void setTipo(TipoEquipamento tipo) { this.tipo = tipo; }
-
-    public String getEndereco() { return endereco; }
-    public void setEndereco(String endereco) { this.endereco = endereco; }
-
-    public boolean isAtivo() { return ativo; }
-    public void setAtivo(boolean ativo) { this.ativo = ativo; }
-
-    public LocalDateTime getCriadoEm() { return criadoEm; }
-    public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
-
-    public Long getCriadoPor() { return criadoPor; }
-    public void setCriadoPor(Long criadoPor) { this.criadoPor = criadoPor; }
-
-    public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
-    public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
-
-    public Long getAtualizadoPor() { return atualizadoPor; }
-    public void setAtualizadoPor(Long atualizadoPor) { this.atualizadoPor = atualizadoPor; }
 }

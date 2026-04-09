@@ -1,15 +1,15 @@
 package br.gov.pmr.cad_familias.controller.auth;
 
-import br.gov.pmr.cad_familias.VO.usuario.CriarUsuarioDTO;
-import br.gov.pmr.cad_familias.VO.usuario.UsuarioVO;
 import br.gov.pmr.cad_familias.domain.usuario.DadosLogin;
 import br.gov.pmr.cad_familias.domain.usuario.LoginResponseDTO;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
+import br.gov.pmr.cad_familias.dto.usuario.CriarUsuarioDTO;
+import br.gov.pmr.cad_familias.dto.usuario.UsuarioDTO;
 import br.gov.pmr.cad_familias.excecao.UsuarioOuSenhaInvalidoException;
 import br.gov.pmr.cad_familias.mapper.usuario.UsuarioMapper;
 import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
-import br.gov.pmr.cad_familias.service.TokenService;
-import br.gov.pmr.cad_familias.service.usuario.UsuarioService;
+import br.gov.pmr.cad_familias.service.auth.TokenService;
+import br.gov.pmr.cad_familias.service.auth.UsuarioService;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,10 +21,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static br.gov.pmr.cad_familias.util.Constantes.AUTH_TOKEN;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AutenticacaoController {
 
 	private final AuthenticationManager authenticationManager;
@@ -40,6 +42,12 @@ public class AutenticacaoController {
 		this.tokenService = tokenService;
 		this.usuarioService = usuarioService;
 		this.usuarioRepository = usuarioRepository;
+	}
+
+	@GetMapping
+	public ResponseEntity<List<UsuarioDTO>> listar() {
+		List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
+		return ResponseEntity.ok(usuarios);
 	}
 
 	@PostMapping("/login")
@@ -70,7 +78,7 @@ public class AutenticacaoController {
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE
 	)
-	public ResponseEntity<UsuarioVO> criarUsuario(@Valid @RequestBody CriarUsuarioDTO dto) {
+	public ResponseEntity<UsuarioDTO> criarUsuario(@Valid @RequestBody CriarUsuarioDTO dto) {
 		return ResponseEntity.status(201).body(usuarioService.criarUsuario(dto));
 	}
 
@@ -81,7 +89,7 @@ public class AutenticacaoController {
 	}
 
 	@GetMapping("/isLogado")
-	public ResponseEntity<UsuarioVO> verificarUsuarioLogado(HttpServletRequest request) {
+	public ResponseEntity<UsuarioDTO> verificarUsuarioLogado(HttpServletRequest request) {
 		String token = request.getHeader(AUTH_TOKEN);
 		String username = tokenService.validarToken(token);
 		Usuario usuario = usuarioRepository.findByUsernameIgnoreCase(username).orElseThrow();

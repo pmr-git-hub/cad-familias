@@ -1,5 +1,6 @@
 package br.gov.pmr.cad_familias.infra.seguranca;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,23 +17,28 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class ConfiguracaoSeguranca {
 
-//    private final FiltroTokenAcesso filtroTokenAcesso;
+    @Value("${cors.allow-requestMatchers-login}")
+    private String requestMatchersLogin;
+    @Value("${cors.allow-requestMatchers-refreshToken}")
+    private String requestMatchersRefreshToken;
 
-//    public ConfiguracaoSeguranca(FiltroTokenAcesso filtroTokenAcesso) {
-//        this.filtroTokenAcesso = filtroTokenAcesso;
-//    }
+    private final FiltroTokenAcesso filtroTokenAcesso;
+
+    public ConfiguracaoSeguranca(FiltroTokenAcesso filtroTokenAcesso) {
+        this.filtroTokenAcesso = filtroTokenAcesso;
+    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
                 .authorizeHttpRequests(req -> {
-                    req.requestMatchers("/auth/login", "/auth/atualizar-token").permitAll();
+                    req.requestMatchers(requestMatchersLogin, requestMatchersRefreshToken).permitAll();
                     req.anyRequest().authenticated();
                 })
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
-//                .addFilterBefore(filtroTokenAcesso, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(filtroTokenAcesso, UsernamePasswordAuthenticationFilter.class)
                 .build();
 
 	}

@@ -4,9 +4,9 @@ public class Constantes {
 
 	public static final String AUTH_TOKEN = "authtoken";
 	public static final String REFRESH_TOKEN = "refreshtoken";
-	public static final String SET_COOKIE = "Set-Cookie";
 	public static final String OPTION_METHOD = "OPTIONS";
-	public static final String AUTH_LOGIN = "/auth/login";
-	public static final String AUTH_ATUALIZAR_TOKEN = "/auth/atualizar-token";
-	public static final String AUTH_LOGOUT = "/auth/logout";
+	public static final String AUTH_LOGIN = "/api/auth/login";
+	public static final String AUTH_ATUALIZAR_TOKEN = "/api/auth/atualizar-token";
+	public static final String AUTH_LOGOUT = "/api/auth/logout";
+	public static final String USUARIO_ID = "usuarioId";
 }

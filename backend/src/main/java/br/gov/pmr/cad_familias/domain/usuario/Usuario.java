@@ -2,6 +2,8 @@ package br.gov.pmr.cad_familias.domain.usuario;
 
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +15,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "usuario")
+@Setter
+@Getter
 public class Usuario implements UserDetails, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -27,9 +31,6 @@ public class Usuario implements UserDetails, Serializable {
 
 	@Column(name = "nome_usuario", nullable = false, unique = true)
 	private String username;
-
-	@Column
-	private String nome;
 
 	@Column(name = "senha", nullable = false)
 	private String password;
@@ -84,39 +85,4 @@ public class Usuario implements UserDetails, Serializable {
 	@Override
 	public boolean isEnabled() { return ativo; }
 
-	public Long getId() { return id; }
-	public void setId(Long id) { this.id = id; }
-
-	public Tecnico getTecnico() { return tecnico; }
-	public void setTecnico(Tecnico tecnico) { this.tecnico = tecnico; }
-
-	public String getUsername() { return username; }
-	public void setUsername(String username) { this.username = username; }
-
-	public String getNome() { return nome; }
-	public void setNome(String nome) { this.nome = nome; }
-
-	public String getPassword() { return password; }
-	public void setPassword(String password) { this.password = password; }
-
-	public boolean isAtivo() { return ativo; }
-	public void setAtivo(boolean ativo) { this.ativo = ativo; }
-
-	public LocalDateTime getUltimoAcesso() { return ultimoAcesso; }
-	public void setUltimoAcesso(LocalDateTime ultimoAcesso) { this.ultimoAcesso = ultimoAcesso; }
-
-	public LocalDateTime getCriadoEm() { return criadoEm; }
-	public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
-
-	public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
-	public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
-
-	public Perfil getPerfil() { return perfil; }
-	public void setPerfil(Perfil perfil) { this.perfil = perfil; }
-
-	public String getToken() { return token; }
-	public void setToken(String token) { this.token = token; }
-
-	public String getRefreshToken() { return refreshToken; }
-	public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 }

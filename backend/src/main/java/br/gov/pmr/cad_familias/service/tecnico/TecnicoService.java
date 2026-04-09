@@ -1,6 +1,6 @@
 package br.gov.pmr.cad_familias.service.tecnico;
 
-import br.gov.pmr.cad_familias.VO.tecnico.TecnicoVO;
+import br.gov.pmr.cad_familias.dto.tecnico.TecnicoDTO;
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
@@ -10,6 +10,7 @@ import br.gov.pmr.cad_familias.repository.tecnico.TecnicoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,42 +25,61 @@ public class TecnicoService {
         this.equipamentoRepository = equipamentoRepository;
     }
 
-    public List<TecnicoVO> listarTecnicos() {
+    public List<TecnicoDTO> listarTecnicos() {
         return TecnicoMapper.listaTecnicosToVO(tecnicoRepository.findAll());
     }
 
-    public TecnicoVO buscarPorId(Long id) {
+    public TecnicoDTO buscarPorId(Long id) {
         return tecnicoRepository.findById(id)
                 .map(TecnicoMapper::tecnicoToTecnicoVO)
                 .orElseThrow(TecnicoNaoEncontradoException::new);
     }
 
     @Transactional
-    public TecnicoVO salvar(TecnicoVO tecnicoVO) {
-        Equipamento equipamento = equipamentoRepository.findById(tecnicoVO.getEquipamentoId())
+    public TecnicoDTO criarTecnico(TecnicoDTO tecnicoDTO, Long usuarioId) {
+        Equipamento equipamento = equipamentoRepository.findById(tecnicoDTO.getEquipamentoId())
                 .orElseThrow(() -> new IllegalArgumentException("Equipamento não encontrado."));
 
-        Tecnico tecnico = TecnicoMapper.tecnicoVOToTecnico(tecnicoVO, equipamento);
+        Tecnico tecnico = TecnicoMapper.tecnicoVOToTecnico(tecnicoDTO, equipamento);
+        tecnico.setCriadoEm(LocalDateTime.now());
+        tecnico.setAtualizadoEm(LocalDateTime.now());
+        tecnico.setCriadoPor(usuarioId);
+        tecnico.setAtualizadoPor(usuarioId);
         return TecnicoMapper.tecnicoToTecnicoVO(tecnicoRepository.save(tecnico));
     }
 
     @Transactional
-    public TecnicoVO editar(Long id, TecnicoVO tecnicoVO) {
+    public TecnicoDTO atualizarTecnico(Long id, TecnicoDTO tecnicoDTO, Long usuarioId) {
         Tecnico tecnico = tecnicoRepository.findById(id)
                 .orElseThrow(TecnicoNaoEncontradoException::new);
 
-        Equipamento equipamento = equipamentoRepository.findById(tecnicoVO.getEquipamentoId())
-                .orElseThrow(() -> new IllegalArgumentException("Equipamento não encontrado."));
+        if (tecnicoDTO.getNome() != null) {
+            tecnico.setNome(tecnicoDTO.getNome());
+        }
+        if (tecnicoDTO.getCpf() != null) {
+            tecnico.setCpf(tecnicoDTO.getCpf());
+        }
+        if (tecnicoDTO.getRegistroProfissional() != null) {
+            tecnico.setRegistroProfissional(tecnicoDTO.getRegistroProfissional());
+        }
+        if (tecnicoDTO.getEspecialidade() != null) {
+            tecnico.setEspecialidade(tecnicoDTO.getEspecialidade());
+        }
+        if (tecnicoDTO.getEquipamentoId() != null) {
+            Equipamento equipamento = equipamentoRepository.findById(tecnicoDTO.getEquipamentoId())
+                    .orElseThrow(() -> new IllegalArgumentException("Equipamento não encontrado."));
+            tecnico.setEquipamento(equipamento);
+        }
+        if (tecnicoDTO.isAtivo() != tecnico.isAtivo()) {
+            tecnico.setAtivo(tecnicoDTO.isAtivo());
+        }
 
-        tecnico.setNome(tecnicoVO.getNome());
-        tecnico.setCpf(tecnicoVO.getCpf());
-        tecnico.setRegistroProfissional(tecnicoVO.getRegistroProfissional());
-        tecnico.setEspecialidade(tecnicoVO.getEspecialidade());
-        tecnico.setEquipamento(equipamento);
-        tecnico.setAtivo(tecnicoVO.isAtivo());
+        tecnico.setAtualizadoEm(LocalDateTime.now());
+        tecnico.setAtualizadoPor(usuarioId);
 
         return TecnicoMapper.tecnicoToTecnicoVO(tecnicoRepository.save(tecnico));
     }
+
 
     @Transactional
     public void desativar(Long id) {

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.gov.pmr.cad_familias.VO.familia.EnderecoVO;
-import br.gov.pmr.cad_familias.VO.familia.FamiliaVO;
-import br.gov.pmr.cad_familias.VO.familia.PessoaVO;
+import br.gov.pmr.cad_familias.dto.familia.EnderecoDTO;
+import br.gov.pmr.cad_familias.dto.familia.FamiliaDTO;
+import br.gov.pmr.cad_familias.dto.familia.PessoaDTO;
 import br.gov.pmr.cad_familias.domain.familia.Endereco;
 import br.gov.pmr.cad_familias.domain.familia.Familia;
 import br.gov.pmr.cad_familias.domain.familia.Pessoa;
@@ -14,23 +14,27 @@ import br.gov.pmr.cad_familias.domain.familia.Pessoa;
 public class FamiliaMapper {
 
     // VO → Entidade
-    public static Familia familiaVoToFamilia(FamiliaVO familiaVO) {
-        if (familiaVO == null) throw new IllegalArgumentException("FamiliaVO não pode ser null.");
+    public static Familia familiaVoToFamilia(FamiliaDTO familiaDTO) {
+        if (familiaDTO == null) throw new IllegalArgumentException("FamiliaVO não pode ser null.");
 
         Familia familia = new Familia();
+        familia.setCodigoCadunico(familiaDTO.getCodigoCadunico());
+        familia.setSituacao(familiaDTO.getSituacao());
+        familia.setMembrosDaFamilia(new ArrayList<>());
+
         familia.setMembrosDaFamilia(new ArrayList<>());
 
         // Mapeia membros comuns
-        List<PessoaVO> membros = Optional.ofNullable(familiaVO.getMembrosDaFamilia()).orElse(new ArrayList<>());
-        for (PessoaVO pessoaVO : membros) {
-            Pessoa pessoa = pessoaVoToPessoa(pessoaVO);
+        List<PessoaDTO> membros = Optional.ofNullable(familiaDTO.getMembrosDaFamilia()).orElse(new ArrayList<>());
+        for (PessoaDTO pessoaDTO : membros) {
+            Pessoa pessoa = pessoaVoToPessoa(pessoaDTO);
             pessoa.setFamilia(familia);
             familia.getMembrosDaFamilia().add(pessoa);
         }
 
         // Mapeia pessoa de referência
-        if (familiaVO.getPessoaReferencia() != null) {
-            Pessoa referencia = pessoaVoToPessoa(familiaVO.getPessoaReferencia());
+        if (familiaDTO.getPessoaReferencia() != null) {
+            Pessoa referencia = pessoaVoToPessoa(familiaDTO.getPessoaReferencia());
             referencia.setReferencia(true);
             referencia.setFamilia(familia);
             familia.getMembrosDaFamilia().add(referencia);
@@ -40,42 +44,44 @@ public class FamiliaMapper {
     }
 
     // Entidade → VO
-    public static FamiliaVO familiaToFamiliaVo(Familia familia) {
+    public static FamiliaDTO familiaToFamiliaVo(Familia familia) {
         if (familia == null) throw new IllegalArgumentException("Familia não pode ser null.");
 
-        FamiliaVO familiaVO = new FamiliaVO();
-        familiaVO.setId(familia.getId());
+        FamiliaDTO familiaDTO = new FamiliaDTO();
+        familiaDTO.setId(familia.getId());
+        familiaDTO.setCodigoCadunico(familia.getCodigoCadunico());
+        familiaDTO.setSituacao(familia.getSituacao());
 
-        List<PessoaVO> membros = new ArrayList<>();
+        List<PessoaDTO> membros = new ArrayList<>();
 
         familia.getMembrosDaFamilia().forEach(membro -> {
-            PessoaVO pessoaVO = pessoaToPessoaVo(membro);
+            PessoaDTO pessoaDTO = pessoaToPessoaVo(membro);
             if (membro.isReferencia()) {
-                familiaVO.setPessoaReferencia(pessoaVO);
+                familiaDTO.setPessoaReferencia(pessoaDTO);
             } else {
-                membros.add(pessoaVO);
+                membros.add(pessoaDTO);
             }
         });
 
-        familiaVO.setMembrosDaFamilia(membros);
+        familiaDTO.setMembrosDaFamilia(membros);
 
         // Calcula renda familiar
         long rendaFamiliar = familia.getMembrosDaFamilia().stream()
                 .mapToLong(p -> p.getRendaMensal() != null ? p.getRendaMensal() : 0L)
                 .sum();
-        familiaVO.setRendaFamiliar(rendaFamiliar);
+        familiaDTO.setRendaFamiliar(rendaFamiliar);
 
-        return familiaVO;
+        return familiaDTO;
     }
 
-    public static List<FamiliaVO> listaFamiliasToListaFamiliasVO(List<Familia> familias) {
+    public static List<FamiliaDTO> listaFamiliasToListaFamiliasVO(List<Familia> familias) {
         return familias.stream()
                 .map(FamiliaMapper::familiaToFamiliaVo)
                 .toList();
     }
 
     // Pessoa VO → Entidade
-    public static Pessoa pessoaVoToPessoa(PessoaVO vo) {
+    public static Pessoa pessoaVoToPessoa(PessoaDTO vo) {
         if (vo == null) return null;
         Pessoa pessoa = new Pessoa();
         pessoa.setId(vo.getId());
@@ -95,9 +101,9 @@ public class FamiliaMapper {
     }
 
     // Pessoa Entidade → VO
-    public static PessoaVO pessoaToPessoaVo(Pessoa pessoa) {
+    public static PessoaDTO pessoaToPessoaVo(Pessoa pessoa) {
         if (pessoa == null) return null;
-        PessoaVO vo = new PessoaVO();
+        PessoaDTO vo = new PessoaDTO();
         vo.setId(pessoa.getId());
         vo.setNome(pessoa.getNome());
         vo.setCpf(pessoa.getCpf());
@@ -115,7 +121,7 @@ public class FamiliaMapper {
     }
 
     // Endereco VO → Entidade
-    public static Endereco enderecoVoToEndereco(EnderecoVO vo) {
+    public static Endereco enderecoVoToEndereco(EnderecoDTO vo) {
         if (vo == null) return null;
         Endereco endereco = new Endereco();
         endereco.setLogradouro(vo.getLogradouro());
@@ -130,9 +136,9 @@ public class FamiliaMapper {
     }
 
     // Endereco Entidade → VO
-    public static EnderecoVO enderecoToEnderecoVo(Endereco endereco) {
+    public static EnderecoDTO enderecoToEnderecoVo(Endereco endereco) {
         if (endereco == null) return null;
-        EnderecoVO vo = new EnderecoVO();
+        EnderecoDTO vo = new EnderecoDTO();
         vo.setLogradouro(endereco.getLogradouro());
         vo.setNumero(endereco.getNumero());
         vo.setBairro(endereco.getBairro());

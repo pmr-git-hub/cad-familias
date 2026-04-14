@@ -46,13 +46,4 @@ public class EquipamentoController {
         Equipamento equipamentoAtualizado = equipamentoService.atualizarEquipamentoParcial(id, equipamentoDTO, usuarioId);
         return ResponseEntity.ok(equipamentoAtualizado);
     }
-
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> desativarEquipamento(
-            @PathVariable Long id, HttpServletRequest request) {
-        Long usuarioId = (Long) request.getAttribute(Constantes.USUARIO_ID);
-        equipamentoService.desativarEquipamento(id, usuarioId);
-        return ResponseEntity.noContent().build();
-    }
 }

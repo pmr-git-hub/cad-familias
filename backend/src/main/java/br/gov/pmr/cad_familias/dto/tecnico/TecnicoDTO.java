@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Setter
 @Getter
@@ -15,6 +16,6 @@ public class TecnicoDTO implements Serializable {
     private String cpf;
     private String registroProfissional;
     private Especialidade especialidade;
-    private String nomeEquipamento;
+    private List<TecnicoEquipamentoDTO> equipamentos;
     private boolean ativo;
 }

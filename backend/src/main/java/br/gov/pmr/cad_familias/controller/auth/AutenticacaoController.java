@@ -3,13 +3,11 @@ package br.gov.pmr.cad_familias.controller.auth;
 import br.gov.pmr.cad_familias.domain.usuario.DadosLogin;
 import br.gov.pmr.cad_familias.domain.usuario.LoginResponseDTO;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
-import br.gov.pmr.cad_familias.dto.usuario.CriarUsuarioDTO;
 import br.gov.pmr.cad_familias.dto.usuario.UsuarioDTO;
 import br.gov.pmr.cad_familias.excecao.UsuarioOuSenhaInvalidoException;
 import br.gov.pmr.cad_familias.mapper.usuario.UsuarioMapper;
 import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
 import br.gov.pmr.cad_familias.service.auth.TokenService;
-import br.gov.pmr.cad_familias.service.auth.UsuarioService;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,8 +19,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 import static br.gov.pmr.cad_familias.util.Constantes.AUTH_TOKEN;
 
 @RestController
@@ -31,23 +27,14 @@ public class AutenticacaoController {
 
 	private final AuthenticationManager authenticationManager;
 	private final TokenService tokenService;
-	private final UsuarioService usuarioService;
 	private final UsuarioRepository usuarioRepository;
 
 	public AutenticacaoController(AuthenticationManager authenticationManager,
 								  TokenService tokenService,
-								  UsuarioService usuarioService,
 								  UsuarioRepository usuarioRepository) {
 		this.authenticationManager = authenticationManager;
 		this.tokenService = tokenService;
-		this.usuarioService = usuarioService;
 		this.usuarioRepository = usuarioRepository;
-	}
-
-	@GetMapping
-	public ResponseEntity<List<UsuarioDTO>> listar() {
-		List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
-		return ResponseEntity.ok(usuarios);
 	}
 
 	@PostMapping("/login")
@@ -73,18 +60,8 @@ public class AutenticacaoController {
 		}
 	}
 
-	@PostMapping(
-			value = "/criarUsuario",
-			consumes = MediaType.APPLICATION_JSON_VALUE,
-			produces = MediaType.APPLICATION_JSON_VALUE
-	)
-	public ResponseEntity<UsuarioDTO> criarUsuario(@Valid @RequestBody CriarUsuarioDTO dto) {
-		return ResponseEntity.status(201).body(usuarioService.criarUsuario(dto));
-	}
-
 	@GetMapping("/logout")
 	public ResponseEntity<String> logout() {
-		// JWT é stateless — logout é responsabilidade do cliente (descartar o token)
 		return ResponseEntity.ok("Logout realizado com sucesso.");
 	}
 

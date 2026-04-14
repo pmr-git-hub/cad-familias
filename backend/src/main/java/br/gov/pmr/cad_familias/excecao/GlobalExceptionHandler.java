@@ -47,6 +47,30 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.FOUND)
                 .body(errorResponse);
     }
+    @ExceptionHandler(EquipamentoNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handlerEquipamentoNaoEncontrado(EquipamentoNaoEncontradoException exception){
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FOUND.value(),
+                "Equipamento não encontrado.",
+                exception.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .body(errorResponse);
+    }
+    @ExceptionHandler(UsuarioNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handlerUsuarioNaoEncontrado(UsuarioNaoEncontradoException exception){
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FOUND.value(),
+                "Usuário não encontrado.",
+                exception.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .body(errorResponse);
+    }
     @ExceptionHandler(TokenInvalidoException.class)
     public ResponseEntity<ErrorResponse> handlerTokenInvalido(TokenInvalidoException exception){
         ErrorResponse errorResponse = new ErrorResponse(

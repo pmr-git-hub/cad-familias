@@ -8,17 +8,18 @@ import {
   Pencil,
   Power,
   PowerOff,
-  MapPin,
+  Users,
   Loader2,
 } from "lucide-react";
-import { EquipamentoForm } from "@/modules/equipamentos/components/equipamento-form";
-import { EquipamentoModalMudarStatus } from "@/modules/equipamentos/components/equipamento-modal-mudarStatus";
-
-import { useEquipamentosPage } from "@/modules/equipamentos/hooks/use-equipamentos-page";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { TecnicoForm } from "@/modules/tecnicos/components/tecnico-form";
+import { TecnicoModalMudarStatus } from "@/modules/tecnicos/components/tecnico-modal-mudar-status";
 
-export default function EquipamentosPage() {
+import { useTecnicosPage } from "@/modules/tecnicos/hooks/use-tecnicos-page";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { useEquipamentos } from "@/modules/equipamentos/hooks/use-equipamentos";
+
+export default function TecnicosPage() {
   const {
     filtrados,
     loading,
@@ -36,28 +37,36 @@ export default function EquipamentosPage() {
     handleMudarStatus,
     handleFecharForm,
     handleFecharMudarStatus,
-    enderecoFormatado,
-  } = useEquipamentosPage();
+    especialidadeFormatada,
+  } = useTecnicosPage();
+
+  const { equipamentos } = useEquipamentos();
+  const equipamentosOptions = equipamentos.map((e) => ({
+    id: e.id,
+    nome: e.nome,
+    }));
 
   return (
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: "Administração", href: "/administracao" },
+          { label: "Técnicos" },
+        ]}
+      />
 
-      
-      <div className="space-y-6">
-        <Breadcrumb items={[
-            { label: "Administração", href: "/administracao" },
-            { label: "Equipamentos" },
-        ]}/>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Equipamentos</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Técnicos</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie os equipamentos da rede socioassistencial
+            Gerencie os técnicos da rede socioassistencial
           </p>
         </div>
         <Button onClick={handleNovo} className="gap-2">
           <Plus className="h-4 w-4" />
-          Novo Equipamento
+          Novo Técnico
         </Button>
       </div>
 
@@ -65,7 +74,7 @@ export default function EquipamentosPage() {
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <Input
-          placeholder="Buscar por nome, tipo, bairro ou cidade..."
+          placeholder="Buscar por nome, CPF, especialidade..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           className="pl-10"
@@ -89,21 +98,21 @@ export default function EquipamentosPage() {
       {/* Vazio */}
       {!loading && !error && filtrados.length === 0 && (
         <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
-          <MapPin className="mx-auto h-12 w-12 text-gray-300" />
+          <Users className="mx-auto h-12 w-12 text-gray-300" />
           <h3 className="mt-4 text-lg font-medium text-gray-900">
             {busca
-              ? "Nenhum equipamento encontrado"
-              : "Nenhum equipamento cadastrado"}
+              ? "Nenhum técnico encontrado"
+              : "Nenhum técnico cadastrado"}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
             {busca
               ? "Tente alterar os termos da busca."
-              : "Comece cadastrando o primeiro equipamento da rede."}
+              : "Comece cadastrando o primeiro técnico da rede."}
           </p>
           {!busca && (
             <Button onClick={handleNovo} className="mt-4 gap-2">
               <Plus className="h-4 w-4" />
-              Cadastrar Equipamento
+              Cadastrar Técnico
             </Button>
           )}
         </div>
@@ -119,13 +128,16 @@ export default function EquipamentosPage() {
                   Nome
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Tipo
+                  CPF
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Endereço
+                  Especialidade
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Contato
+                  Registro
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Equipamento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Status
@@ -136,48 +148,57 @@ export default function EquipamentosPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtrados.map((equip) => (
+              {filtrados.map((tec) => (
                 <tr
-                  key={equip.id}
+                  key={tec.id}
                   className="hover:bg-gray-50/50 transition-colors"
                 >
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {equip.nome}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10">
-                      {equip.tipo}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                    {enderecoFormatado(equip)}
+                    {tec.nome}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    <div className="flex flex-col">
-                      {equip.telefone && <span>{equip.telefone}</span>}
-                      {equip.email && (
-                        <span className="text-xs text-gray-400 truncate max-w-[180px]">
-                          {equip.email}
-                        </span>
-                      )}
-                      {!equip.telefone && !equip.email && "—"}
-                    </div>
+                    {tec.cpf}
                   </td>
                   <td className="px-6 py-4">
-                    <StatusBadge ativo={equip.ativo} />
+                    <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10">
+                      {especialidadeFormatada(tec.especialidade)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {tec.registroProfissional || "—"}
+                  </td>
+                  <td className="px-6 py-4">
+                    {tec.equipamentos.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                        {tec.equipamentos.map((eq) => (
+                            <span
+                            key={eq.id}
+                            className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10"
+                            >
+                            {eq.nomeEquipamento}
+                            </span>
+                        ))}
+                        </div>
+                    ) : (
+                        <span className="text-sm text-gray-400">Sem vínculo</span>
+                    )}
+                    </td>
+
+                  <td className="px-6 py-4">
+                    <StatusBadge ativo={tec.ativo} />
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleEditar(equip)}
+                        onClick={() => handleEditar(tec)}
                         className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
                         title="Editar"
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      {equip.ativo ? (
+                      {tec.ativo ? (
                         <button
-                          onClick={() => setMudandoStatus(equip)}
+                          onClick={() => setMudandoStatus(tec)}
                           className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
                           title="Desativar"
                         >
@@ -185,7 +206,7 @@ export default function EquipamentosPage() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => setMudandoStatus(equip)}
+                          onClick={() => setMudandoStatus(tec)}
                           className="rounded-lg p-2 text-gray-400 hover:bg-green-50 hover:text-green-600 transition-colors cursor-pointer"
                           title="Reativar"
                         >
@@ -202,22 +223,22 @@ export default function EquipamentosPage() {
       )}
 
       {/* Modais */}
-      <EquipamentoForm
-        equipamento={editando}
+      <TecnicoForm
         open={formOpen}
+        tecnico={editando}
         onClose={handleFecharForm}
         onSubmit={handleSubmit}
+        equipamentosDisponiveis={equipamentosOptions}
         loading={submitting}
-      />
+        />
 
-      <EquipamentoModalMudarStatus
-        equipamento={mudandoStatus}
+      <TecnicoModalMudarStatus
+        tecnico={mudandoStatus}
         open={!!mudandoStatus}
         onClose={handleFecharMudarStatus}
         onConfirm={handleMudarStatus}
         loading={submitting}
       />
-     
     </div>
   );
 }

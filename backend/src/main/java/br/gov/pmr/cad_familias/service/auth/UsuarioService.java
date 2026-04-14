@@ -1,10 +1,12 @@
 package br.gov.pmr.cad_familias.service.auth;
 
-import br.gov.pmr.cad_familias.dto.usuario.CriarUsuarioDTO;
-import br.gov.pmr.cad_familias.dto.usuario.UsuarioDTO;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
+import br.gov.pmr.cad_familias.dto.usuario.AtualizarUsuarioDTO;
+import br.gov.pmr.cad_familias.dto.usuario.CriarUsuarioDTO;
+import br.gov.pmr.cad_familias.dto.usuario.UsuarioDTO;
 import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
+import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.mapper.usuario.UsuarioMapper;
 import br.gov.pmr.cad_familias.repository.tecnico.TecnicoRepository;
 import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
@@ -43,6 +45,26 @@ public class UsuarioService implements UserDetailsService {
 
 		Usuario usuario = UsuarioMapper.criarUsuarioDTOToUsuario(dto, tecnico);
 		usuario.setPassword(encoder.encode(dto.getPassword()));
+
+		return UsuarioMapper.usuarioToUsuarioVO(usuarioRepository.save(usuario));
+	}
+
+	@Transactional
+	public UsuarioDTO atualizarUsuario(Long id, AtualizarUsuarioDTO dto) {
+		Usuario usuario = usuarioRepository.findById(id)
+				.orElseThrow(UsuarioNaoEncontradoException::new);
+
+		Tecnico tecnico = tecnicoRepository.findById(dto.getTecnicoId())
+				.orElseThrow(TecnicoNaoEncontradoException::new);
+
+		usuario.setUsername(dto.getUsername());
+		usuario.setPerfil(dto.getPerfil());
+		usuario.setTecnico(tecnico);
+		usuario.setAtivo(dto.getAtivo());
+
+		if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+			usuario.setPassword(encoder.encode(dto.getPassword()));
+		}
 
 		return UsuarioMapper.usuarioToUsuarioVO(usuarioRepository.save(usuario));
 	}

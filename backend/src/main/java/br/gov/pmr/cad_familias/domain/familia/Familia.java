@@ -53,4 +53,14 @@ public class Familia implements Serializable {
 		this.atualizadoEm = LocalDateTime.now();
 	}
 
+	public String getNomeReferencia() {
+		if (membrosDaFamilia == null) return null;
+		return membrosDaFamilia.stream()
+				.filter(Pessoa::isReferencia)
+				.map(Pessoa::getNome)
+				.findFirst()
+				.orElse(null);
+	}
+
+
 }

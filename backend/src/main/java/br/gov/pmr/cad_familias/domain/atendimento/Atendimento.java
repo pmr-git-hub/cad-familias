@@ -1,5 +1,7 @@
-package br.gov.pmr.cad_familias.domain.tecnico;
+package br.gov.pmr.cad_familias.domain.atendimento;
 
+import br.gov.pmr.cad_familias.domain.familia.Pessoa;
+import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,30 +10,42 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tecnico")
+@Table(name = "atendimento")
 @Getter
 @Setter
-public class Tecnico implements Serializable {
+public class Atendimento implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 300)
-    private String nome;
+    @ManyToOne
+    @JoinColumn(name = "prontuario_id", nullable = false)
+    private Prontuario prontuario;
 
-    @Column(nullable = false, length = 14, unique = true)
-    private String cpf;
+    @ManyToOne
+    @JoinColumn(name = "tecnico_id", nullable = false)
+    private Tecnico tecnico;
 
-    @Column(name = "registro_profissional")
-    private String registroProfissional;
+    @ManyToOne
+    @JoinColumn(name = "pessoa_id")
+    private Pessoa pessoa;
+
+    // servico_id será adicionado na Fase 4 (quando criarmos a entidade Servico)
+
+    @Column(nullable = false)
+    private LocalDateTime data;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Especialidade especialidade;
+    private TipoAtendimento tipo;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean ativo = true;
+    private ModalidadeAtendimento modalidade;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String descricao;
 
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;

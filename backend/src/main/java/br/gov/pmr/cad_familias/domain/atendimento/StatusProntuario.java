@@ -1,4 +1,4 @@
-package br.gov.pmr.cad_familias.domain.prontuario;
+package br.gov.pmr.cad_familias.domain.atendimento;
 
 public enum StatusProntuario {
     ABERTO,

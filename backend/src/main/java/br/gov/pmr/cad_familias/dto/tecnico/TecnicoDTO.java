@@ -15,7 +15,6 @@ public class TecnicoDTO implements Serializable {
     private String cpf;
     private String registroProfissional;
     private Especialidade especialidade;
-    private Long equipamentoId;
     private String nomeEquipamento;
     private boolean ativo;
 }

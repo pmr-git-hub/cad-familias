@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Building2, Users, BookOpen, Shield } from "lucide-react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const adminModules = [
   {
@@ -35,6 +36,7 @@ const adminModules = [
 export default function AdministracaoPage() {
   return (
     <div className="space-y-6">
+        <Breadcrumb items={[ { label: "Administração" }]}/>
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Administração</h1>
         <p className="text-sm text-muted-foreground mt-1">

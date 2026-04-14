@@ -15,6 +15,7 @@ import { EquipamentoForm } from "@/modules/equipamentos/components/equipamento-f
 import { EquipamentoModalMudarStatus } from "@/modules/equipamentos/components/equipamento-modal-mudarStatus";
 import { EquipamentoStatusBadge } from "@/modules/equipamentos/components/equipamento-status-badge";
 import { useEquipamentosPage } from "@/modules/equipamentos/hooks/use-equipamentos-page";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function EquipamentosPage() {
   const {
@@ -38,7 +39,13 @@ export default function EquipamentosPage() {
   } = useEquipamentosPage();
 
   return (
-    <div className="space-y-6">
+
+      
+      <div className="space-y-6">
+        <Breadcrumb items={[
+            { label: "Administração", href: "/administracao" },
+            { label: "Equipamentos" },
+        ]}/>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

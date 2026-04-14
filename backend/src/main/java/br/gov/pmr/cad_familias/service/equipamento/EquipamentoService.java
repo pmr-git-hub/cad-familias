@@ -77,11 +77,4 @@ public class EquipamentoService {
     }
 
 
-    public void desativarEquipamento(Long id, Long usuarioId) {
-        Equipamento equipamento = buscarEquipamentoPorId(id);
-        equipamento.setAtivo(false);
-        equipamento.setAtualizadoEm(LocalDateTime.now());
-        equipamento.setAtualizadoPor(usuarioId);
-        equipamentoRepository.save(equipamento);
-    }
 }

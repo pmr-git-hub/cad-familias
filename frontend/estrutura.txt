@@ -1,0 +1,88 @@
+﻿frontend
+|-- public
+|   |-- images
+|   |   |-- banner-login.jpg
+|   |   |-- brasao-cidade.png
+|   |   |-- logo-cad-circular.png
+|   |   +-- logo-cad-horizontal.png
+|   |-- favicon.ico
+|   |-- file.svg
+|   |-- globe.svg
+|   |-- next.svg
+|   |-- vercel.svg
+|   +-- window.svg
+|-- src
+|   |-- app
+|   |   |-- (painel)
+|   |   |   |-- administracao
+|   |   |   |   |-- equipamentos
+|   |   |   |   |   +-- page.tsx
+|   |   |   |   +-- page.tsx
+|   |   |   |-- layout.tsx
+|   |   |   +-- page.tsx
+|   |   |-- login
+|   |   |   |-- components
+|   |   |   |   |-- LoginBanner.tsx
+|   |   |   |   +-- LoginForm.tsx
+|   |   |   |-- esqueci-senha
+|   |   |   |   +-- page.tsx
+|   |   |   |-- hooks
+|   |   |   |   +-- useLoginForm.ts
+|   |   |   +-- page.tsx
+|   |   |-- globals.css
+|   |   +-- layout.tsx
+|   |-- components
+|   |   +-- ui
+|   |       |-- button.tsx
+|   |       |-- checkbox.tsx
+|   |       |-- input.tsx
+|   |       +-- label.tsx
+|   |-- layouts
+|   |   |-- header.tsx
+|   |   +-- sidebar.tsx
+|   |-- lib
+|   |   |-- api.ts
+|   |   +-- utils.ts
+|   |-- modules
+|   |   |-- encaminhamentos
+|   |   |-- equipamentos
+|   |   |   |-- components
+|   |   |   |   |-- equipamento-columns.tsx
+|   |   |   |   |-- equipamento-form.tsx
+|   |   |   |   |-- equipamento-modal-delete.tsx
+|   |   |   |   +-- equipamento-status-badge.tsx
+|   |   |   |-- hooks
+|   |   |   |   |-- use-equipamento-form.ts
+|   |   |   |   |-- use-equipamentos.ts
+|   |   |   |   +-- use-equipamentos-page.ts
+|   |   |   |-- services
+|   |   |   |   +-- equipamento-service.ts
+|   |   |   +-- types
+|   |   |       +-- equipamento.ts
+|   |   |-- familias
+|   |   |-- pessoas
+|   |   |-- programas
+|   |   +-- tecnicos
+|   |-- routes
+|   +-- shared
+|       |-- components
+|       |   +-- auth-guard.tsx
+|       |-- hooks
+|       |-- services
+|       |   +-- auth-service.ts
+|       |-- types
+|       |   +-- auth.ts
+|       +-- utils
+|-- .env.local
+|-- .gitignore
+|-- AGENTS.md
+|-- CLAUDE.md
+|-- components.json
+|-- eslint.config.mjs
+|-- next.config.ts
+|-- next-env.d.ts
+|-- package.json
+|-- package-lock.json
+|-- postcss.config.mjs
+|-- README.md
++-- tsconfig.json

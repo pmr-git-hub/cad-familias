@@ -1,0 +1,277 @@
+﻿cad-ribeirão
+|-- backend
+|   |-- .idea
+|   |   |-- .gitignore
+|   |   |-- compiler.xml
+|   |   |-- encodings.xml
+|   |   |-- jarRepositories.xml
+|   |   |-- misc.xml
+|   |   |-- vcs.xml
+|   |   +-- workspace.xml
+|   |-- .mvn
+|   |   +-- wrapper
+|   |       +-- maven-wrapper.properties
+|   |-- src
+|   |   |-- main
+|   |   |   |-- java
+|   |   |   |   +-- br
+|   |   |   |       +-- gov
+|   |   |   |           +-- pmr
+|   |   |   |               +-- cad_familias
+|   |   |   |                   |-- controller
+|   |   |   |                   |   |-- atendimento
+|   |   |   |                   |   |   |-- AtendimentoController.java
+|   |   |   |                   |   |   +-- ProntuarioController.java
+|   |   |   |                   |   |-- auth
+|   |   |   |                   |   |   +-- AutenticacaoController.java
+|   |   |   |                   |   |-- encaminhamento
+|   |   |   |                   |   |   +-- EncaminhamentoController.java
+|   |   |   |                   |   |-- equipamento
+|   |   |   |                   |   |   +-- EquipamentoController.java
+|   |   |   |                   |   |-- familia
+|   |   |   |                   |   |   +-- FamiliaController.java
+|   |   |   |                   |   |-- relatorio
+|   |   |   |                   |   |   +-- RelatorioController.java
+|   |   |   |                   |   +-- tecnico
+|   |   |   |                   |       +-- TecnicoController.java
+|   |   |   |                   |-- domain
+|   |   |   |                   |   |-- atendimento
+|   |   |   |                   |   |   |-- Atendimento.java
+|   |   |   |                   |   |   |-- ModalidadeAtendimento.java
+|   |   |   |                   |   |   |-- Prontuario.java
+|   |   |   |                   |   |   |-- StatusProntuario.java
+|   |   |   |                   |   |   +-- TipoAtendimento.java
+|   |   |   |                   |   |-- audit
+|   |   |   |                   |   |   |-- AcaoAudit.java
+|   |   |   |                   |   |   +-- AuditLog.java
+|   |   |   |                   |   |-- encaminhamento
+|   |   |   |                   |   |   |-- Encaminhamento.java
+|   |   |   |                   |   |   +-- StatusEncaminhamento.java
+|   |   |   |                   |   |-- equipamento
+|   |   |   |                   |   |   |-- Equipamento.java
+|   |   |   |                   |   |   +-- TipoEquipamento.java
+|   |   |   |                   |   |-- familia
+|   |   |   |                   |   |   |-- Endereco.java
+|   |   |   |                   |   |   |-- Familia.java
+|   |   |   |                   |   |   |-- LocalizacaoDomicilio.java
+|   |   |   |                   |   |   |-- Parentesco.java
+|   |   |   |                   |   |   |-- Pessoa.java
+|   |   |   |                   |   |   |-- Sexo.java
+|   |   |   |                   |   |   +-- SituacaoFamilia.java
+|   |   |   |                   |   |-- programa
+|   |   |   |                   |   |   |-- ProgramaSocial.java
+|   |   |   |                   |   |   |-- StatusVinculo.java
+|   |   |   |                   |   |   +-- VinculoFamiliaPrograma.java
+|   |   |   |                   |   |-- tecnico
+|   |   |   |                   |   |   |-- Especialidade.java
+|   |   |   |                   |   |   |-- Tecnico.java
+|   |   |   |                   |   |   +-- TecnicoEquipamento.java
+|   |   |   |                   |   +-- usuario
+|   |   |   |                   |       |-- DadosLogin.java
+|   |   |   |                   |       |-- LoginResponseDTO.java
+|   |   |   |                   |       |-- Perfil.java
+|   |   |   |                   |       +-- Usuario.java
+|   |   |   |                   |-- dto
+|   |   |   |                   |   |-- atendimento
+|   |   |   |                   |   |   |-- AtendimentoAtualizacaoDTO.java
+|   |   |   |                   |   |   |-- AtendimentoCadastroDTO.java
+|   |   |   |                   |   |   |-- AtendimentoRespostaDTO.java
+|   |   |   |                   |   |   |-- ProntuarioAtualizacaoDTO.java
+|   |   |   |                   |   |   |-- ProntuarioCadastroDTO.java
+|   |   |   |                   |   |   +-- ProntuarioRespostaDTO.java
+|   |   |   |                   |   |-- encaminhamento
+|   |   |   |                   |   |   |-- EncaminhamentoAtualizacaoStatusDTO.java
+|   |   |   |                   |   |   |-- EncaminhamentoCadastroDTO.java
+|   |   |   |                   |   |   +-- EncaminhamentoRespostaDTO.java
+|   |   |   |                   |   |-- equipamento
+|   |   |   |                   |   |   +-- EquipamentoAtualizacaoDTO.java
+|   |   |   |                   |   |-- familia
+|   |   |   |                   |   |   |-- EnderecoDTO.java
+|   |   |   |                   |   |   |-- FamiliaDTO.java
+|   |   |   |                   |   |   +-- PessoaDTO.java
+|   |   |   |                   |   |-- tecnico
+|   |   |   |                   |   |   |-- TecnicoDTO.java
+|   |   |   |                   |   |   +-- TecnicoResumoDTO.java
+|   |   |   |                   |   +-- usuario
+|   |   |   |                   |       |-- CriarUsuarioDTO.java
+|   |   |   |                   |       +-- UsuarioDTO.java
+|   |   |   |                   |-- excecao
+|   |   |   |                   |   |-- ErrorResponse.java
+|   |   |   |                   |   |-- FamiliaNaoEncontradaException.java
+|   |   |   |                   |   |-- GlobalExceptionHandler.java
+|   |   |   |                   |   |-- TecnicoNaoEncontradoException.java
+|   |   |   |                   |   |-- TokenInvalidoException.java
+|   |   |   |                   |   +-- UsuarioOuSenhaInvalidoException.java
+|   |   |   |                   |-- infra
+|   |   |   |                   |   |-- seguranca
+|   |   |   |                   |   |   |-- usuario
+|   |   |   |                   |   |   |   |-- UsuarioLogado.java
+|   |   |   |                   |   |   |   +-- UsuarioLogadoResolver.java
+|   |   |   |                   |   |   |-- ConfiguracaoSeguranca.java
+|   |   |   |                   |   |   |-- FiltroTokenAcesso.java
+|   |   |   |                   |   |   +-- WebConfig.java
+|   |   |   |                   |   +-- JacksonConfig.java
+|   |   |   |                   |-- mapper
+|   |   |   |                   |   |-- familia
+|   |   |   |                   |   |   +-- FamiliaMapper.java
+|   |   |   |                   |   |-- tecnico
+|   |   |   |                   |   |   +-- TecnicoMapper.java
+|   |   |   |                   |   +-- usuario
+|   |   |   |                   |       +-- UsuarioMapper.java
+|   |   |   |                   |-- repository
+|   |   |   |                   |   |-- atendimento
+|   |   |   |                   |   |   |-- AtendimentoRepository.java
+|   |   |   |                   |   |   +-- ProntuarioRepository.java
+|   |   |   |                   |   |-- audit
+|   |   |   |                   |   |   +-- AuditLogRepository.java
+|   |   |   |                   |   |-- encaminhamento
+|   |   |   |                   |   |   +-- EncaminhamentoRepository.java
+|   |   |   |                   |   |-- equipamento
+|   |   |   |                   |   |   +-- EquipamentoRepository.java
+|   |   |   |                   |   |-- familia
+|   |   |   |                   |   |   |-- FamiliaRepository.java
+|   |   |   |                   |   |   +-- PessoaRepository.java
+|   |   |   |                   |   |-- tecnico
+|   |   |   |                   |   |   +-- TecnicoRepository.java
+|   |   |   |                   |   +-- usuario
+|   |   |   |                   |       +-- UsuarioRepository.java
+|   |   |   |                   |-- service
+|   |   |   |                   |   |-- atendimento
+|   |   |   |                   |   |   |-- AtendimentoService.java
+|   |   |   |                   |   |   +-- ProntuarioService.java
+|   |   |   |                   |   |-- audit
+|   |   |   |                   |   |   +-- AuditService.java
+|   |   |   |                   |   |-- auth
+|   |   |   |                   |   |   |-- TokenService.java
+|   |   |   |                   |   |   +-- UsuarioService.java
+|   |   |   |                   |   |-- encaminhamento
+|   |   |   |                   |   |   +-- EncaminhamentoService.java
+|   |   |   |                   |   |-- equipamento
+|   |   |   |                   |   |   +-- EquipamentoService.java
+|   |   |   |                   |   |-- familia
+|   |   |   |                   |   |   +-- FamiliaService.java
+|   |   |   |                   |   +-- tecnico
+|   |   |   |                   |       +-- TecnicoService.java
+|   |   |   |                   |-- util
+|   |   |   |                   |   |-- Constantes.java
+|   |   |   |                   |   +-- CustomLocalDateDeserializer.java
+|   |   |   |                   +-- CadFamiliasBackendApplication.java
+|   |   |   +-- resources
+|   |   |       |-- db
+|   |   |       |   +-- migration
+|   |   |       |       |-- V2__refactor_familia_pessoa.sql
+|   |   |       |       |-- V3__ajuste_coluna_criado_em_usuario.sql
+|   |   |       |       |-- V4__update_table_equipamento.sql
+|   |   |       |       |-- V5__update_table_usuario_drop_nome.sql
+|   |   |       |       |-- V6__remove_constraint_referencia_por_familia.sql
+|   |   |       |       |-- V7__add_modalidade_to_atendimento.sql
+|   |   |       |       +-- V8__create_tecnico_equipamento.sql
+|   |   |       |-- relatorios
+|   |   |       |   |-- familias.jasper
+|   |   |       |   +-- familias.jrxml
+|   |   |       |-- application.yml
+|   |   |       |-- application-docker.yml
+|   |   |       +-- logback-spring.xml
+|   |   +-- test
+|   |       +-- java
+|   |           +-- br
+|   |               |-- com
+|   |               |   +-- pmr
+|   |               +-- gov
+|   |                   +-- pmr
+|   |                       +-- cad_familias
+|   |                           +-- CadFamiliasBackendApplicationTests.java
+|   |-- .gitattributes
+|   |-- .gitignore
+|   |-- docker-compose.dev.yml
+|   |-- docker-compose.yml
+|   |-- Dockerfile
+|   |-- hs_err_pid42128.log
+|   |-- mvnw
+|   |-- mvnw.cmd
+|   +-- pom.xml
+|-- Documentos
+|   |-- Logo
+|   |   |-- logo_cad.png
+|   |   |-- logo_pmr.png
+|   |   +-- logo_ribeirao_cad.png
+|   |-- Cad Ribeirão.docx
+|   |-- Cad Ribeirão.pdf
+|   |-- Cad Ribeirão.pptx
+|   |-- Fluxo Processo SUAS.bpm
+|   |-- Fluxo Processo SUAS.png
+|   |-- Modelo de Dados — Cad Ribeirão (v1).pdf
+|   +-- Resumo geral do projeto.pdf
+|-- frontend
+|   |-- public
+|   |   |-- images
+|   |   |   |-- banner-login.jpg
+|   |   |   |-- brasao-cidade.png
+|   |   |   |-- logo-cad-circular.png
+|   |   |   +-- logo-cad-horizontal.png
+|   |   |-- favicon.ico
+|   |   |-- file.svg
+|   |   |-- globe.svg
+|   |   |-- next.svg
+|   |   |-- vercel.svg
+|   |   +-- window.svg
+|   |-- src
+|   |   |-- app
+|   |   |   |-- (painel)
+|   |   |   |   |-- layout.tsx
+|   |   |   |   +-- page.tsx
+|   |   |   |-- login
+|   |   |   |   |-- components
+|   |   |   |   |   |-- LoginBanner.tsx
+|   |   |   |   |   +-- LoginForm.tsx
+|   |   |   |   |-- esqueci-senha
+|   |   |   |   |   +-- page.tsx
+|   |   |   |   |-- hooks
+|   |   |   |   |   +-- useLoginForm.ts
+|   |   |   |   +-- page.tsx
+|   |   |   |-- globals.css
+|   |   |   +-- layout.tsx
+|   |   |-- components
+|   |   |   +-- ui
+|   |   |       |-- button.tsx
+|   |   |       |-- checkbox.tsx
+|   |   |       |-- input.tsx
+|   |   |       +-- label.tsx
+|   |   |-- layouts
+|   |   |   |-- header.tsx
+|   |   |   +-- sidebar.tsx
+|   |   |-- lib
+|   |   |   |-- api.ts
+|   |   |   +-- utils.ts
+|   |   |-- modules
+|   |   |   |-- encaminhamentos
+|   |   |   |-- equipamentos
+|   |   |   |-- familias
+|   |   |   |-- pessoas
+|   |   |   |-- programas
+|   |   |   +-- tecnicos
+|   |   |-- routes
+|   |   +-- shared
+|   |       |-- components
+|   |       |   +-- auth-guard.tsx
+|   |       |-- hooks
+|   |       |-- services
+|   |       |   +-- auth-service.ts
+|   |       |-- types
+|   |       |   +-- auth.ts
+|   |       +-- utils
+|   |-- .env.local
+|   |-- .gitignore
+|   |-- AGENTS.md
+|   |-- CLAUDE.md
+|   |-- components.json
+|   |-- eslint.config.mjs
+|   |-- next.config.ts
+|   |-- next-env.d.ts
+|   |-- package.json
+|   |-- package-lock.json
+|   |-- postcss.config.mjs
+|   |-- README.md
+|   +-- tsconfig.json
+|-- docker-compose.yml.txt
++-- gerar-arvore.ps1

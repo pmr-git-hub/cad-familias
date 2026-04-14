@@ -24,7 +24,7 @@ export const authService = {
       localStorage.setItem(REMEMBER_KEY, String(remember));
     }
 
-    const data = await api<LoginResponse>("/api /auth/login", {
+    const data = await api<LoginResponse>("/api/auth/login", {
       method: "POST",
       body: { nomeUsuario, senha } satisfies LoginRequest,
     });

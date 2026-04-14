@@ -1,0 +1,84 @@
+/* src/app/globals.css */
+@import "tailwindcss";
+
+/* ========== Tema customizado CAD Ribeirão ========== */
+@theme {
+  /* Cores da marca */
+  --color-brand-dark-blue: #1B3A6B;
+  --color-brand-medium-blue: #2563EB;
+  --color-brand-light-blue: #38BDF8;
+  --color-brand-yellow: #F5C542;
+  --color-brand-green: #22C55E;
+
+  /* Tokens semânticos */
+  --color-primary: #1B3A6B;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #F1F5F9;
+  --color-secondary-foreground: #1B3A6B;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-accent: #38BDF8;
+  --color-accent-foreground: #FFFFFF;
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-input: #E2E8F0;
+  --color-ring: #1B3A6B;
+  --color-background: #FFFFFF;
+  --color-foreground: #1B3A6B;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1B3A6B;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1B3A6B;
+
+  /* Radius */
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+
+  /* Animações */
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-spin-slow: spin 3s linear infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ========== Base ========== */
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ========== Scrollbar ========== */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #1B3A6B #F1F5F9;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #F1F5F9;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #1B3A6B;
+    border-radius: 3px;
+  }
+}

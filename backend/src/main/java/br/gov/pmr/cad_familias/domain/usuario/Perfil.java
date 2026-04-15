@@ -1,43 +1,36 @@
 package br.gov.pmr.cad_familias.domain.usuario;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Perfil {
-	ADMIN("ADMIN", "Administrador"), USER("USUARIO", "Usuário");
-	
-	public String codigo;
-	
-	public String descricao;
+	ADMIN("ADMIN", "Administrador"),
+	USUARIO("USUARIO", "Usuário");
 
-	private Perfil(String codigo, String descricao) {
+	private final String codigo;
+	private final String descricao;
+
+	Perfil(String codigo, String descricao) {
 		this.codigo = codigo;
 		this.descricao = descricao;
 	}
 
+	@JsonValue
 	public String getCodigo() {
 		return codigo;
-	}
-
-	public void setCodigo(String codigo) {
-		this.codigo = codigo;
 	}
 
 	public String getDescricao() {
 		return descricao;
 	}
 
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	}
-	
 	@JsonCreator
 	public static Perfil fromCodigo(String codigo) {
 		for (Perfil perfil : Perfil.values()) {
-			if(perfil.getCodigo().equalsIgnoreCase(codigo)) {
+			if (perfil.getCodigo().equalsIgnoreCase(codigo)) {
 				return perfil;
 			}
 		}
 		return null;
 	}
-	
 }

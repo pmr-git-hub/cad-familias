@@ -34,28 +34,31 @@ export function Sidebar() {
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-100">
-        {!collapsed && (
-          <Image
+     {/* Logo */}
+    <div className="flex h-16 items-center justify-between px-4 border-b border-gray-100">
+    {!collapsed && (
+        <div className="relative h-10 w-40">
+        <Image
             src="/images/logo-cad-horizontal.png"
             alt="CAD Ribeirão"
-            width={140}
-            height={45}
+            fill
+            className="object-contain"
             priority
-          />
+        />
+        </div>
+    )}
+    <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
+    >
+        {collapsed ? (
+        <ChevronRight className="h-4 w-4" />
+        ) : (
+        <ChevronLeft className="h-4 w-4" />
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </button>
-      </div>
+    </button>
+    </div>
+
 
       {/* Menu */}
       <nav className="flex-1 space-y-1 px-3 py-4">

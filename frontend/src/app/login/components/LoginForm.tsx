@@ -33,6 +33,7 @@ export function LoginForm() {
             alt="Logo CAD Ribeirão"
             width={250}
             height={80}
+            style={{ width: 'auto', height: 'auto' }}
             priority
           />
           <div className="mt-3 h-1 w-16 rounded-full bg-brand-yellow" />

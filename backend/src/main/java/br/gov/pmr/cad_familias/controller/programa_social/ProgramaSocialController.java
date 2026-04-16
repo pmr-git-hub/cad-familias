@@ -2,6 +2,7 @@ package br.gov.pmr.cad_familias.controller.programa_social;
 
 import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialRequest;
 import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialResponse;
+import br.gov.pmr.cad_familias.infra.seguranca.usuario.UsuarioLogado;
 import br.gov.pmr.cad_familias.service.programa.ProgramaSocialService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,8 +24,7 @@ public class ProgramaSocialController {
     @PostMapping
     public ResponseEntity<ProgramaSocialResponse> criar(
             @Valid @RequestBody ProgramaSocialRequest request,
-            @RequestHeader("X-Usuario-Id") Long usuarioId
-    ) {
+            @UsuarioLogado Long usuarioId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request, usuarioId));
     }
 
@@ -32,8 +32,7 @@ public class ProgramaSocialController {
     public ResponseEntity<ProgramaSocialResponse> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ProgramaSocialRequest request,
-            @RequestHeader("X-Usuario-Id") Long usuarioId
-    ) {
+            @UsuarioLogado Long usuarioId) {
         return ResponseEntity.ok(service.atualizar(id, request, usuarioId));
     }
 
@@ -60,8 +59,7 @@ public class ProgramaSocialController {
     @PatchMapping("/{id}/desativar")
     public ResponseEntity<ProgramaSocialResponse> desativar(
             @PathVariable Long id,
-            @RequestHeader("X-Usuario-Id") Long usuarioId
-    ) {
+            @UsuarioLogado Long usuarioId) {
         return ResponseEntity.ok(service.desativar(id, usuarioId));
     }
 }

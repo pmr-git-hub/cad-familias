@@ -12,7 +12,7 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-	@Value("${cors.allowed-origins}")
+	@Value("${cors.allow-origins}")
 	private String allowedOrigins;
 
 	@Value("${cors.allow-headers}")

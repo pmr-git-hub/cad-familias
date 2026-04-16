@@ -27,7 +27,7 @@ public class FiltroTokenAcesso extends OncePerRequestFilter {
 
     private final UsuarioRepository usuarioRepository;
 
-    @Value("${cors.allowed-origins}")
+    @Value("${cors.allow-origins}")
     private String allowedOrigins;
     @Value("${cors.allow-headers}")
     private String allowedHeaders;

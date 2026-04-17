@@ -1,5 +1,7 @@
+// app/(painel)/administracao/page.tsx
+
 import Link from "next/link";
-import { Building2, Users, BookOpen, Shield } from "lucide-react";
+import { Building2, Users, BookOpen, Shield, Shapes } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const adminModules = [
@@ -25,6 +27,13 @@ const adminModules = [
     color: "bg-purple-50 text-purple-600",
   },
   {
+    label: "Serviços",
+    description: "SCFV, grupos, oficinas e atividades dos equipamentos",
+    href: "/administracao/servicos",
+    icon: Shapes,
+    color: "bg-indigo-50 text-indigo-600",
+  },
+  {
     label: "Usuários",
     description: "Contas de acesso e permissões",
     href: "/administracao/usuarios",
@@ -36,7 +45,7 @@ const adminModules = [
 export default function AdministracaoPage() {
   return (
     <div className="space-y-6">
-        <Breadcrumb items={[ { label: "Administração" }]}/>
+      <Breadcrumb items={[{ label: "Administração" }]} />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Administração</h1>
         <p className="text-sm text-muted-foreground mt-1">

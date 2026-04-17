@@ -9,7 +9,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,15 +23,7 @@ import static br.gov.pmr.cad_familias.util.Constantes.*;
 public class FiltroTokenAcesso extends OncePerRequestFilter {
 
     private final TokenService tokenService;
-
     private final UsuarioRepository usuarioRepository;
-
-    @Value("${cors.allow-origins}")
-    private String allowedOrigins;
-    @Value("${cors.allow-headers}")
-    private String allowedHeaders;
-    @Value("${cors.allow-methods}")
-    private String allowedMethods;
 
     public FiltroTokenAcesso(TokenService tokenService, UsuarioRepository usuarioRepository) {
         this.tokenService = tokenService;
@@ -40,64 +31,59 @@ public class FiltroTokenAcesso extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.startsWith("/api/auth/");
+    }
 
-        response.setHeader("Access-Control-Allow-Origin", allowedOrigins);
-        if (OPTION_METHOD.equalsIgnoreCase(request.getMethod())) {
-            response.setHeader("Access-Control-Allow-Methods", allowedMethods);
-            response.setHeader("Access-Control-Allow-Headers", allowedHeaders);
-            response.setStatus(HttpServletResponse.SC_OK);
-            return;
-        }
-        String requestURI = request.getRequestURI();
-        if (requestURI.equals(AUTH_LOGOUT) || requestURI.equals(AUTH_LOGIN) || requestURI.equals(AUTH_ATUALIZAR_TOKEN)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-        try{
-            String token = recuperarTokenRequisicao(request);
-            if(token != null){
-                String username = tokenService.validarToken(token);
-                if(username == null){
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Retorna 401
-                    return;
-                }
-                Usuario usuario = usuarioRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UsuarioOuSenhaInvalidoException("Usuário ou senha inválidos."));
-                request.setAttribute("usuarioId", usuario.getId());
-                Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Retorna 401
+        try {
+            String token = recuperarToken(request);
+
+            if (token == null) {
+                responderNaoAutorizado(response, "Token não fornecido");
                 return;
             }
-        } catch (JWTVerificationException e){
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(
-                    String.format("{\"error\": \"%s\", \"message\": \"%s\", \"status\": %d}",
-                            "Token inválido ou expirado",
-                            e.getMessage(),
-                            HttpServletResponse.SC_UNAUTHORIZED)
-            );
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Retorna 401
+
+            String username = tokenService.validarToken(token);
+
+            if (username == null) {
+                responderNaoAutorizado(response, "Token inválido");
+                return;
+            }
+
+            Usuario usuario = usuarioRepository.findByUsernameIgnoreCase(username)
+                    .orElseThrow(() -> new UsuarioOuSenhaInvalidoException("Usuário não encontrado."));
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    usuario, null, usuario.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (JWTVerificationException e) {
+            responderNaoAutorizado(response, e.getMessage());
             return;
         }
+
         filterChain.doFilter(request, response);
     }
 
-    private String recuperarTokenRequisicao(HttpServletRequest request) throws JWTVerificationException {
+    private String recuperarToken(HttpServletRequest request) {
         String authToken = request.getHeader(AUTH_TOKEN);
-        if (authToken != null) {
-            try {
-                tokenService.validarToken(authToken); // Valida assinatura, issuer, etc.
-                if (!tokenService.isTokenExpirado(authToken)) {
-                    return authToken;
-                }
-            } catch (JWTVerificationException e) {
-                return null;
-            }
+        if (authToken != null && !tokenService.isTokenExpirado(authToken)) {
+            return authToken;
         }
         return null;
+    }
+
+    private void responderNaoAutorizado(HttpServletResponse response, String mensagem) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write(
+                String.format("{\"error\": \"Token inválido ou expirado\", \"message\": \"%s\", \"status\": 401}", mensagem)
+        );
     }
 }

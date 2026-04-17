@@ -1,6 +1,7 @@
 package br.gov.pmr.cad_familias.controller.programa_social;
 
-import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialRequest;
+import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialCreateRequest;
+import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialUpdateRequest;
 import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialResponse;
 import br.gov.pmr.cad_familias.infra.seguranca.usuario.UsuarioLogado;
 import br.gov.pmr.cad_familias.service.programa.ProgramaSocialService;
@@ -23,7 +24,7 @@ public class ProgramaSocialController {
 
     @PostMapping
     public ResponseEntity<ProgramaSocialResponse> criar(
-            @Valid @RequestBody ProgramaSocialRequest request,
+            @Valid @RequestBody ProgramaSocialCreateRequest request,
             @UsuarioLogado Long usuarioId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request, usuarioId));
     }
@@ -31,7 +32,7 @@ public class ProgramaSocialController {
     @PutMapping("/{id}")
     public ResponseEntity<ProgramaSocialResponse> atualizar(
             @PathVariable Long id,
-            @Valid @RequestBody ProgramaSocialRequest request,
+            @Valid @RequestBody ProgramaSocialUpdateRequest request,
             @UsuarioLogado Long usuarioId) {
         return ResponseEntity.ok(service.atualizar(id, request, usuarioId));
     }

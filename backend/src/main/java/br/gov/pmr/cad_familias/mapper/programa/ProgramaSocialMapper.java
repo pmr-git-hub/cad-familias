@@ -1,14 +1,15 @@
 package br.gov.pmr.cad_familias.mapper.programa;
 
 import br.gov.pmr.cad_familias.domain.programa.ProgramaSocial;
-import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialRequest;
+import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialCreateRequest;
 import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialResponse;
+import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialUpdateRequest;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProgramaSocialMapper {
 
-    public ProgramaSocial toEntity(ProgramaSocialRequest request) {
+    public ProgramaSocial toEntity(ProgramaSocialCreateRequest request) {
         ProgramaSocial entity = new ProgramaSocial();
         entity.setNome(request.getNome());
         entity.setCriterios(request.getCriterios());
@@ -17,10 +18,16 @@ public class ProgramaSocialMapper {
         return entity;
     }
 
-    public void updateEntity(ProgramaSocial entity, ProgramaSocialRequest request) {
-        entity.setNome(request.getNome());
-        entity.setCriterios(request.getCriterios());
-        entity.setOrgaoGestor(request.getOrgaoGestor());
+    public void updateEntity(ProgramaSocial entity, ProgramaSocialUpdateRequest request) {
+        if (request.getNome() != null && !request.getNome().isBlank()) {
+            entity.setNome(request.getNome());
+        }
+        if (request.getCriterios() != null) {
+            entity.setCriterios(request.getCriterios());
+        }
+        if (request.getOrgaoGestor() != null) {
+            entity.setOrgaoGestor(request.getOrgaoGestor());
+        }
         if (request.getAtivo() != null) {
             entity.setAtivo(request.getAtivo());
         }

@@ -40,7 +40,6 @@ export function useProgramasPage() {
           nome: data.nome,
           criterios: data.criterios || undefined,
           orgaoGestor: data.orgaoGestor || undefined,
-          ativo: true,
         });
       }
 
@@ -52,6 +51,7 @@ export function useProgramasPage() {
       setSubmitting(false);
     }
   }
+
 
   async function handleMudarStatus(): Promise<void> {
     if (!mudandoStatus) return;

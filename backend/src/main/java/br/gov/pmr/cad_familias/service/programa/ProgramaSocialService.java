@@ -2,7 +2,8 @@ package br.gov.pmr.cad_familias.service.programa;
 
 import br.gov.pmr.cad_familias.domain.programa.ProgramaSocial;
 import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialResponse;
-import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialRequest;
+import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialCreateRequest;
+import br.gov.pmr.cad_familias.dto.programa.ProgramaSocialUpdateRequest;
 import br.gov.pmr.cad_familias.mapper.programa.ProgramaSocialMapper;
 import br.gov.pmr.cad_familias.repository.programa.ProgramaSocialRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,7 +25,7 @@ public class ProgramaSocialService {
     }
 
     @Transactional
-    public ProgramaSocialResponse criar(ProgramaSocialRequest request, Long usuarioId) {
+    public ProgramaSocialResponse criar(ProgramaSocialCreateRequest request, Long usuarioId) {
         if (repository.existsByNomeIgnoreCase(request.getNome())) {
             throw new IllegalArgumentException("Já existe um programa social com o nome: " + request.getNome());
         }
@@ -36,19 +37,35 @@ public class ProgramaSocialService {
     }
 
     @Transactional
-    public ProgramaSocialResponse atualizar(Long id, ProgramaSocialRequest request, Long usuarioId) {
+    public ProgramaSocialResponse atualizar(Long id, ProgramaSocialUpdateRequest request, Long usuarioId) {
         ProgramaSocial entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Programa social não encontrado: " + id));
 
-        if (repository.existsByNomeIgnoreCaseAndIdNot(request.getNome(), id)) {
-            throw new IllegalArgumentException("Já existe outro programa social com o nome: " + request.getNome());
+        // Só valida duplicidade de nome se o nome veio no request
+        if (request.getNome() != null && !request.getNome().isBlank()) {
+            if (repository.existsByNomeIgnoreCaseAndIdNot(request.getNome(), id)) {
+                throw new IllegalArgumentException("Já existe outro programa social com o nome: " + request.getNome());
+            }
+            entity.setNome(request.getNome());
         }
 
-        mapper.updateEntity(entity, request);
+        if (request.getCriterios() != null) {
+            entity.setCriterios(request.getCriterios());
+        }
+
+        if (request.getOrgaoGestor() != null) {
+            entity.setOrgaoGestor(request.getOrgaoGestor());
+        }
+
+        if (request.getAtivo() != null) {
+            entity.setAtivo(request.getAtivo());
+        }
+
         entity.setAtualizadoPor(usuarioId);
 
         return mapper.toResponse(repository.save(entity));
     }
+
 
     @Transactional(readOnly = true)
     public ProgramaSocialResponse buscarPorId(Long id) {

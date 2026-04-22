@@ -1,6 +1,7 @@
 // UsuarioRepository.java
 package br.gov.pmr.cad_familias.repository.usuario;
 
+import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -13,7 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/atendimentos")
+@RequestMapping("/api/atendimentos")
 public class AtendimentoController {
 
     private final AtendimentoService atendimentoService;

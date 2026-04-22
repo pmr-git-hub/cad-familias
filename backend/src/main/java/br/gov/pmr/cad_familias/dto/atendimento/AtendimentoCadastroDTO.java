@@ -12,10 +12,7 @@ public record AtendimentoCadastroDTO(
         @NotNull(message = "Prontuário é obrigatório")
         Long prontuarioId,
 
-        @NotNull(message = "Técnico é obrigatório")
-        Long tecnicoId,
-
-        Long pessoaId,
+        Long pessoaId,  // opcional — null = atendimento à família toda
 
         @NotNull(message = "Data do atendimento é obrigatória")
         LocalDateTime data,

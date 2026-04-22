@@ -17,7 +17,8 @@ public record ProntuarioRespostaDTO(
         LocalDate dataAbertura,
         LocalDate dataFechamento,
         StatusProntuario status,
-        LocalDateTime criadoEm
+        LocalDateTime criadoEm,
+        String motivoEncerramento
 ) {
     public static ProntuarioRespostaDTO fromEntity(Prontuario p) {
         return new ProntuarioRespostaDTO(
@@ -31,7 +32,8 @@ public record ProntuarioRespostaDTO(
                 p.getDataAbertura(),
                 p.getDataFechamento(),
                 p.getStatus(),
-                p.getCriadoEm()
+                p.getCriadoEm(),
+                p.getMotivoEncerramento()
         );
     }
 }

@@ -11,6 +11,7 @@ import br.gov.pmr.cad_familias.dto.atendimento.AtendimentoRespostaDTO;
 import br.gov.pmr.cad_familias.repository.atendimento.AtendimentoRepository;
 import br.gov.pmr.cad_familias.repository.atendimento.ProntuarioRepository;
 import br.gov.pmr.cad_familias.repository.familia.PessoaRepository;
+import br.gov.pmr.cad_familias.repository.tecnico.TecnicoEquipamentoRepository;
 import br.gov.pmr.cad_familias.repository.tecnico.TecnicoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -24,15 +25,18 @@ public class AtendimentoService {
     private final AtendimentoRepository atendimentoRepository;
     private final ProntuarioRepository prontuarioRepository;
     private final TecnicoRepository tecnicoRepository;
+    private final TecnicoEquipamentoRepository tecnicoEquipamentoRepository;
     private final PessoaRepository pessoaRepository;
 
     public AtendimentoService(AtendimentoRepository atendimentoRepository,
                               ProntuarioRepository prontuarioRepository,
                               TecnicoRepository tecnicoRepository,
+                              TecnicoEquipamentoRepository tecnicoEquipamentoRepository,
                               PessoaRepository pessoaRepository) {
         this.atendimentoRepository = atendimentoRepository;
         this.prontuarioRepository = prontuarioRepository;
         this.tecnicoRepository = tecnicoRepository;
+        this.tecnicoEquipamentoRepository = tecnicoEquipamentoRepository;
         this.pessoaRepository = pessoaRepository;
     }
 
@@ -46,8 +50,20 @@ public class AtendimentoService {
             throw new IllegalStateException("Não é possível registrar atendimento em prontuário que não está aberto.");
         }
 
-        Tecnico tecnico = tecnicoRepository.findById(dto.tecnicoId())
-                .orElseThrow(() -> new EntityNotFoundException("Técnico não encontrado."));
+        // Ponto 5 — técnico é sempre o usuário logado
+        Tecnico tecnico = tecnicoRepository.findById(usuarioId)
+                .orElseThrow(() -> new EntityNotFoundException("Técnico não encontrado para o usuário logado."));
+
+        // Ponto 2 — técnico deve estar vinculado ao equipamento do prontuário
+        boolean vinculado = tecnicoEquipamentoRepository
+                .existsByTecnicoIdAndEquipamentoIdAndAtivoTrue(
+                        tecnico.getId(),
+                        prontuario.getEquipamento().getId()
+                );
+
+        if (!vinculado) {
+            throw new IllegalStateException("Técnico não está vinculado ao equipamento deste prontuário.");
+        }
 
         Pessoa pessoa = null;
         if (dto.pessoaId() != null) {

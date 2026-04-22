@@ -55,6 +55,10 @@ public class Prontuario implements Serializable {
     @Column(name = "atualizado_por")
     private Long atualizadoPor;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String motivoEncerramento;
+
+
     @PrePersist
     public void prePersist() {
         this.criadoEm = LocalDateTime.now();

@@ -2,6 +2,7 @@ package br.gov.pmr.cad_familias.controller.familia;
 
 import java.util.List;
 
+import br.gov.pmr.cad_familias.infra.seguranca.usuario.UsuarioLogado;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,8 +38,8 @@ public class FamiliaController {
 	)
 	public ResponseEntity<FamiliaDTO> criarFamilia(
 			@RequestBody FamiliaDTO familiaDTO,
-			HttpServletRequest request) {
-		Long usuarioId = (Long) request.getAttribute("usuarioId");
+			HttpServletRequest request,
+			@UsuarioLogado Long usuarioId) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(familiaService.salvar(familiaDTO, usuarioId));
 	}
 
@@ -50,8 +51,8 @@ public class FamiliaController {
 	public ResponseEntity<FamiliaDTO> editar(
 			@PathVariable Long id,
 			@RequestBody FamiliaDTO familiaEditada,
-			HttpServletRequest request) {
-		Long usuarioId = (Long) request.getAttribute("usuarioId");
+			HttpServletRequest request,
+			@UsuarioLogado Long usuarioId) {
 		return ResponseEntity.ok(familiaService.editarFamilia(id, familiaEditada, usuarioId));
 	}
 }

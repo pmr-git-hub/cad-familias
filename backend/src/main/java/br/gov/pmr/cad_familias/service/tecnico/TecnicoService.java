@@ -110,9 +110,9 @@ public class TecnicoService {
 
         Equipamento equipamento = equipamentoRepository.findById(dto.getEquipamentoId())
                 .orElseThrow(EquipamentoNaoEncontradoException::new);
-
         boolean jaVinculado = tecnicoEquipamentoRepository
                 .existsByTecnicoIdAndEquipamentoIdAndAtivoTrue(tecnicoId, dto.getEquipamentoId());
+
 
         if (jaVinculado) {
             throw new IllegalStateException("Técnico já está vinculado a este equipamento.");

@@ -1,8 +1,15 @@
 package br.gov.pmr.cad_familias.service.equipamento;
 
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
+import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
+import br.gov.pmr.cad_familias.domain.tecnico.TecnicoEquipamento;
+import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.equipamento.EquipamentoAtualizacaoDTO;
+import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
 import br.gov.pmr.cad_familias.repository.equipamento.EquipamentoRepository;
+import br.gov.pmr.cad_familias.repository.tecnico.TecnicoEquipamentoRepository;
+import br.gov.pmr.cad_familias.repository.tecnico.TecnicoRepository;
+import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -13,6 +20,9 @@ public class EquipamentoService {
 
     @Autowired
     private EquipamentoRepository equipamentoRepository;
+    private TecnicoRepository tecnicoRepository;
+    private TecnicoEquipamentoRepository tecnicoEquipamentoRepository;
+    private UsuarioRepository usuarioRepository;
 
     public Equipamento criarEquipamento(Equipamento equipamento, Long usuarioId) {
         equipamento.setCriadoEm(LocalDateTime.now());
@@ -30,6 +40,16 @@ public class EquipamentoService {
         return equipamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Equipamento não encontrado"));
     }
+    public List<Equipamento> listarEquipamentosTecnico(Long usuarioId) {
+
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
+        List<TecnicoEquipamento> vinculos =
+                tecnicoEquipamentoRepository.findByTecnicoIdAndAtivoTrue(usuario.getTecnico().getId());
+
+
+        return vinculos.stream().map(TecnicoEquipamento::getEquipamento).toList();
+    }
+
 
     public Equipamento atualizarEquipamentoParcial(Long id, EquipamentoAtualizacaoDTO equipamentoDTO, Long usuarioId) {
         Equipamento equipamento = buscarEquipamentoPorId(id);

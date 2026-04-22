@@ -5,9 +5,7 @@ import br.gov.pmr.cad_familias.domain.atendimento.StatusProntuario;
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
 import br.gov.pmr.cad_familias.domain.familia.Familia;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
-import br.gov.pmr.cad_familias.dto.atendimento.ProntuarioAtualizacaoDTO;
-import br.gov.pmr.cad_familias.dto.atendimento.ProntuarioCadastroDTO;
-import br.gov.pmr.cad_familias.dto.atendimento.ProntuarioRespostaDTO;
+import br.gov.pmr.cad_familias.dto.atendimento.*;
 import br.gov.pmr.cad_familias.repository.atendimento.ProntuarioRepository;
 import br.gov.pmr.cad_familias.repository.equipamento.EquipamentoRepository;
 import br.gov.pmr.cad_familias.repository.familia.FamiliaRepository;
@@ -97,7 +95,7 @@ public class ProntuarioService {
     }
 
     @Transactional
-    public ProntuarioRespostaDTO atualizar(Long id, ProntuarioAtualizacaoDTO dto, Long usuarioId) {
+    public ProntuarioRespostaDTO trocarResponsavel(Long id, ProntuarioResponsavelDTO dto, Long usuarioId) {
         Prontuario prontuario = prontuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
 
@@ -105,17 +103,60 @@ public class ProntuarioService {
                 .orElseThrow(() -> new EntityNotFoundException("Técnico não encontrado."));
 
         prontuario.setTecnico(tecnico);
-        prontuario.setStatus(dto.status());
-        prontuario.setDataFechamento(dto.dataFechamento());
         prontuario.setAtualizadoPor(usuarioId);
 
-        // Se status for ENCERRADO e não informou data de fechamento, usa hoje
-        if (dto.status() == StatusProntuario.ENCERRADO && prontuario.getDataFechamento() == null) {
-            prontuario.setDataFechamento(java.time.LocalDate.now());
-        }
-
         prontuarioRepository.save(prontuario);
-
         return ProntuarioRespostaDTO.fromEntity(prontuario);
     }
+
+    @Transactional
+    public ProntuarioRespostaDTO encerrar(Long id, ProntuarioEncerramentoDTO dto, Long usuarioId) {
+        Prontuario prontuario = prontuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
+
+        if (prontuario.getStatus() == StatusProntuario.ENCERRADO) {
+            throw new IllegalStateException("Prontuário já está encerrado.");
+        }
+
+        prontuario.setStatus(StatusProntuario.ENCERRADO);
+        prontuario.setDataFechamento(dto.dataFechamento());
+        prontuario.setMotivoEncerramento(dto.motivoEncerramento());
+        prontuario.setAtualizadoPor(usuarioId);
+
+        prontuarioRepository.save(prontuario);
+        return ProntuarioRespostaDTO.fromEntity(prontuario);
+    }
+
+    @Transactional
+    public ProntuarioRespostaDTO suspender(Long id, Long usuarioId) {
+        Prontuario prontuario = prontuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
+
+        if (prontuario.getStatus() != StatusProntuario.ABERTO) {
+            throw new IllegalStateException("Apenas prontuários abertos podem ser suspensos.");
+        }
+
+        prontuario.setStatus(StatusProntuario.SUSPENSO);
+        prontuario.setAtualizadoPor(usuarioId);
+
+        prontuarioRepository.save(prontuario);
+        return ProntuarioRespostaDTO.fromEntity(prontuario);
+    }
+
+    @Transactional
+    public ProntuarioRespostaDTO reabrir(Long id, Long usuarioId) {
+        Prontuario prontuario = prontuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
+
+        if (prontuario.getStatus() != StatusProntuario.SUSPENSO) {
+            throw new IllegalStateException("Apenas prontuários suspensos podem ser reabertos.");
+        }
+
+        prontuario.setStatus(StatusProntuario.ABERTO);
+        prontuario.setAtualizadoPor(usuarioId);
+
+        prontuarioRepository.save(prontuario);
+        return ProntuarioRespostaDTO.fromEntity(prontuario);
+    }
+
 }

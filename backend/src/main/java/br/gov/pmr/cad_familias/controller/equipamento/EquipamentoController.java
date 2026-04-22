@@ -34,6 +34,11 @@ public class EquipamentoController {
         return ResponseEntity.ok(equipamentoService.listarEquipamentos());
     }
 
+    @GetMapping("/meusEquipamentos")
+    public ResponseEntity<List<Equipamento>> listarEquipamentosPorTecnico(@UsuarioLogado Long usuarioId) {
+        return ResponseEntity.ok(equipamentoService.listarEquipamentosTecnico(usuarioId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Equipamento> buscarEquipamentoPorId(@PathVariable Long id) {
         return ResponseEntity.ok(equipamentoService.buscarEquipamentoPorId(id));

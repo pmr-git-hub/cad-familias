@@ -24,5 +24,7 @@ export const equipamentoService = {
     return api<Equipamento>(`${BASE}/${id}`, { method: "PUT", body: data });
   },
 
-
+  listarMeus: () => {
+    return api<Equipamento[]>(`${BASE}/meusEquipamentos`);
+  }
 };

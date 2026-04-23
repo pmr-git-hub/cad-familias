@@ -4,7 +4,7 @@
 
 import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Users, ChevronRight, ChevronDown, User } from "lucide-react";
+import { Pencil, Users, ChevronRight, ChevronDown, User, FolderOpen } from "lucide-react"; // ← FolderOpen adicionado
 import {
   FamiliaDTO,
   SITUACAO_LABELS,
@@ -142,14 +142,39 @@ export function FamiliaTable({ familias, loading }: Props) {
                       {SITUACAO_LABELS[f.situacao] ?? f.situacao}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => router.push(`/familias/${f.id}/editar`)}
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition"
-                      title="Editar"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
+
+                  {/* ↓ Coluna de ações — adicionados Ver e Prontuários */}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-1">
+
+                      {/* Ver família (detalhe / aba Cadastro) */}
+                      <button
+                        onClick={() => router.push(`/familias/${f.id}`)}
+                        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                        title="Ver família"
+                      >
+                        <User className="h-4 w-4" />
+                      </button>
+
+                      {/* Prontuários (atalho direto) */}
+                      <button
+                        onClick={() => router.push(`/familias/${f.id}/prontuarios`)}
+                        className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition"
+                        title="Prontuários"
+                      >
+                        <FolderOpen className="h-4 w-4" />
+                      </button>
+
+                      {/* Editar */}
+                      <button
+                        onClick={() => router.push(`/familias/${f.id}/editar`)}
+                        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition"
+                        title="Editar"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+
+                    </div>
                   </td>
                 </tr>
 

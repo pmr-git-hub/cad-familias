@@ -2,14 +2,19 @@ package br.gov.pmr.cad_familias.service.atendimento;
 
 import br.gov.pmr.cad_familias.domain.atendimento.Prontuario;
 import br.gov.pmr.cad_familias.domain.atendimento.StatusProntuario;
+import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
 import br.gov.pmr.cad_familias.domain.familia.Familia;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
+import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.atendimento.*;
+import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.repository.atendimento.ProntuarioRepository;
 import br.gov.pmr.cad_familias.repository.equipamento.EquipamentoRepository;
 import br.gov.pmr.cad_familias.repository.familia.FamiliaRepository;
 import br.gov.pmr.cad_familias.repository.tecnico.TecnicoRepository;
+import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
+import br.gov.pmr.cad_familias.service.audit.AuditService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,21 +28,26 @@ public class ProntuarioService {
     private final FamiliaRepository familiaRepository;
     private final EquipamentoRepository equipamentoRepository;
     private final TecnicoRepository tecnicoRepository;
+    private final AuditService auditService;
+    private final UsuarioRepository usuarioRepository;
 
     public ProntuarioService(ProntuarioRepository prontuarioRepository,
                              FamiliaRepository familiaRepository,
                              EquipamentoRepository equipamentoRepository,
-                             TecnicoRepository tecnicoRepository) {
+                             TecnicoRepository tecnicoRepository,
+                             AuditService auditService,
+                             UsuarioRepository usuarioRepository) {
         this.prontuarioRepository = prontuarioRepository;
         this.familiaRepository = familiaRepository;
         this.equipamentoRepository = equipamentoRepository;
         this.tecnicoRepository = tecnicoRepository;
+        this.auditService = auditService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional
     public ProntuarioRespostaDTO cadastrar(ProntuarioCadastroDTO dto, Long usuarioId) {
 
-        // Verifica se já existe prontuário ABERTO para essa família nesse equipamento
         boolean jaExiste = prontuarioRepository
                 .existsByFamiliaIdAndEquipamentoIdAndStatus(dto.familiaId(), dto.equipamentoId(), StatusProntuario.ABERTO);
 
@@ -61,9 +71,26 @@ public class ProntuarioService {
         prontuario.setDataAbertura(dto.dataAbertura());
         prontuario.setCriadoPor(usuarioId);
 
-        prontuarioRepository.save(prontuario);
+        // ✅ Salva
+        Prontuario prontuarioSalvo = prontuarioRepository.save(prontuario);
 
-        return ProntuarioRespostaDTO.fromEntity(prontuario);
+        // ✅ Converte
+        ProntuarioRespostaDTO resultado = ProntuarioRespostaDTO.fromEntity(prontuarioSalvo);
+
+        // ✅ Auditoria (INSERT)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "prontuario",
+                prontuarioSalvo.getId(),
+                AcaoAudit.INSERT,
+                null,
+                resultado,
+                usuario
+        );
+
+        return resultado;
     }
 
     @Transactional(readOnly = true)
@@ -99,20 +126,44 @@ public class ProntuarioService {
         Prontuario prontuario = prontuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
 
+        // ✅ Estado ANTES
+        ProntuarioRespostaDTO estadoAnterior = ProntuarioRespostaDTO.fromEntity(prontuario);
+
         Tecnico tecnico = tecnicoRepository.findById(dto.tecnicoId())
                 .orElseThrow(() -> new EntityNotFoundException("Técnico não encontrado."));
 
         prontuario.setTecnico(tecnico);
         prontuario.setAtualizadoPor(usuarioId);
 
-        prontuarioRepository.save(prontuario);
-        return ProntuarioRespostaDTO.fromEntity(prontuario);
+        // ✅ Salva
+        Prontuario prontuarioSalvo = prontuarioRepository.save(prontuario);
+
+        // ✅ Estado DEPOIS
+        ProntuarioRespostaDTO estadoNovo = ProntuarioRespostaDTO.fromEntity(prontuarioSalvo);
+
+        // ✅ Auditoria
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "prontuario",
+                prontuarioSalvo.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                estadoNovo,
+                usuario
+        );
+
+        return estadoNovo;
     }
 
     @Transactional
     public ProntuarioRespostaDTO encerrar(Long id, ProntuarioEncerramentoDTO dto, Long usuarioId) {
         Prontuario prontuario = prontuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
+
+        // ✅ Captura estado ANTES
+        ProntuarioRespostaDTO estadoAnterior = ProntuarioRespostaDTO.fromEntity(prontuario);
 
         if (prontuario.getStatus() == StatusProntuario.ENCERRADO) {
             throw new IllegalStateException("Prontuário já está encerrado.");
@@ -123,14 +174,33 @@ public class ProntuarioService {
         prontuario.setMotivoEncerramento(dto.motivoEncerramento());
         prontuario.setAtualizadoPor(usuarioId);
 
-        prontuarioRepository.save(prontuario);
-        return ProntuarioRespostaDTO.fromEntity(prontuario);
+        Prontuario prontuarioSalvo = prontuarioRepository.save(prontuario);
+
+        ProntuarioRespostaDTO estadoNovo = ProntuarioRespostaDTO.fromEntity(prontuarioSalvo);
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "prontuario",
+                prontuarioSalvo.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                estadoNovo,
+                usuario
+        );
+
+        return estadoNovo;
     }
+
 
     @Transactional
     public ProntuarioRespostaDTO suspender(Long id, Long usuarioId) {
         Prontuario prontuario = prontuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
+
+        // ✅ Estado ANTES
+        ProntuarioRespostaDTO estadoAnterior = ProntuarioRespostaDTO.fromEntity(prontuario);
 
         if (prontuario.getStatus() != StatusProntuario.ABERTO) {
             throw new IllegalStateException("Apenas prontuários abertos podem ser suspensos.");
@@ -139,14 +209,32 @@ public class ProntuarioService {
         prontuario.setStatus(StatusProntuario.SUSPENSO);
         prontuario.setAtualizadoPor(usuarioId);
 
-        prontuarioRepository.save(prontuario);
-        return ProntuarioRespostaDTO.fromEntity(prontuario);
+        Prontuario prontuarioSalvo = prontuarioRepository.save(prontuario);
+
+        ProntuarioRespostaDTO estadoNovo = ProntuarioRespostaDTO.fromEntity(prontuarioSalvo);
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "prontuario",
+                prontuarioSalvo.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                estadoNovo,
+                usuario
+        );
+
+        return estadoNovo;
     }
 
     @Transactional
     public ProntuarioRespostaDTO reabrir(Long id, Long usuarioId) {
         Prontuario prontuario = prontuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prontuário não encontrado."));
+
+        // ✅ Estado ANTES
+        ProntuarioRespostaDTO estadoAnterior = ProntuarioRespostaDTO.fromEntity(prontuario);
 
         if (prontuario.getStatus() != StatusProntuario.SUSPENSO) {
             throw new IllegalStateException("Apenas prontuários suspensos podem ser reabertos.");
@@ -155,8 +243,23 @@ public class ProntuarioService {
         prontuario.setStatus(StatusProntuario.ABERTO);
         prontuario.setAtualizadoPor(usuarioId);
 
-        prontuarioRepository.save(prontuario);
-        return ProntuarioRespostaDTO.fromEntity(prontuario);
+        Prontuario prontuarioSalvo = prontuarioRepository.save(prontuario);
+
+        ProntuarioRespostaDTO estadoNovo = ProntuarioRespostaDTO.fromEntity(prontuarioSalvo);
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "prontuario",
+                prontuarioSalvo.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                estadoNovo,
+                usuario
+        );
+
+        return estadoNovo;
     }
 
 }

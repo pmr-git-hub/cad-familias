@@ -1,11 +1,16 @@
 package br.gov.pmr.cad_familias.service.servico;
 
+import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
 import br.gov.pmr.cad_familias.domain.servico.Servico;
+import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.servico.ServicoCreateRequest;
 import br.gov.pmr.cad_familias.dto.servico.ServicoResponse;
 import br.gov.pmr.cad_familias.dto.servico.ServicoUpdateRequest;
+import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.mapper.servico.ServicoMapper;
 import br.gov.pmr.cad_familias.repository.servico.ServicoRepository;
+import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
+import br.gov.pmr.cad_familias.service.audit.AuditService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +23,17 @@ public class ServicoService {
 
     private final ServicoRepository repository;
     private final ServicoMapper mapper;
+    private final AuditService auditService;
+    private final UsuarioRepository usuarioRepository;
 
-    public ServicoService(ServicoRepository repository, ServicoMapper mapper) {
+    public ServicoService(ServicoRepository repository,
+                          ServicoMapper mapper,
+                          AuditService auditService,
+                          UsuarioRepository usuarioRepository) {
         this.repository = repository;
         this.mapper = mapper;
+        this.auditService = auditService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional
@@ -38,13 +50,35 @@ public class ServicoService {
         Servico entity = mapper.toEntity(request);
         entity.setCriadoPor(usuarioId);
 
-        return mapper.toResponse(repository.save(entity));
+        // ✅ Salva
+        Servico entitySalva = repository.save(entity);
+
+        // ✅ Converte
+        ServicoResponse resultado = mapper.toResponse(entitySalva);
+
+        // ✅ Auditoria (INSERT)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "servicos",
+                entitySalva.getId(),
+                AcaoAudit.INSERT,
+                null,
+                resultado,
+                usuario
+        );
+
+        return resultado;
     }
 
     @Transactional
     public ServicoResponse atualizar(Long id, ServicoUpdateRequest request, Long usuarioId) {
         Servico entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Serviço não encontrado: " + id));
+
+        // ✅ Estado ANTES
+        ServicoResponse estadoAnterior = mapper.toResponse(entity);
 
         // Validação de nome duplicado (só se nome ou equipamento mudaram)
         String nomeCheck = request.getNome() != null && !request.getNome().isBlank()
@@ -67,7 +101,26 @@ public class ServicoService {
         mapper.updateEntity(entity, request);
         entity.setAtualizadoPor(usuarioId);
 
-        return mapper.toResponse(repository.save(entity));
+        // ✅ Salva
+        Servico entitySalva = repository.save(entity);
+
+        // ✅ Estado DEPOIS
+        ServicoResponse estadoNovo = mapper.toResponse(entitySalva);
+
+        // ✅ Auditoria
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "servicos",
+                entitySalva.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                estadoNovo,
+                usuario
+        );
+
+        return estadoNovo;
     }
 
     @Transactional(readOnly = true)
@@ -117,10 +170,32 @@ public class ServicoService {
         Servico entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Serviço não encontrado: " + id));
 
+        // ✅ Estado ANTES
+        ServicoResponse estadoAnterior = mapper.toResponse(entity);
+
         entity.setAtivo(false);
         entity.setAtualizadoPor(usuarioId);
 
-        return mapper.toResponse(repository.save(entity));
+        // ✅ Salva
+        Servico entitySalva = repository.save(entity);
+
+        // ✅ Estado DEPOIS
+        ServicoResponse estadoNovo = mapper.toResponse(entitySalva);
+
+        // ✅ Auditoria
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "servicos",
+                entitySalva.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                estadoNovo,
+                usuario
+        );
+
+        return estadoNovo;
     }
 
     private void validarFaixaEtaria(Integer min, Integer max) {

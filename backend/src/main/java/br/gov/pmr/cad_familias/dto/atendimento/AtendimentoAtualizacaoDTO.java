@@ -11,6 +11,10 @@ public record AtendimentoAtualizacaoDTO(
 
         Long pessoaId,
 
+        Long servicoId,
+
+        Long programaId,
+
         @NotNull(message = "Data do atendimento é obrigatória")
         LocalDateTime data,
 

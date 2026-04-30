@@ -1,6 +1,8 @@
 package br.gov.pmr.cad_familias.domain.atendimento;
 
 import br.gov.pmr.cad_familias.domain.familia.Pessoa;
+import br.gov.pmr.cad_familias.domain.programa.ProgramaSocial;
+import br.gov.pmr.cad_familias.domain.servico.Servico;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -31,7 +33,15 @@ public class Atendimento implements Serializable {
     @JoinColumn(name = "pessoa_id")
     private Pessoa pessoa;
 
-    // servico_id será adicionado na Fase 4 (quando criarmos a entidade Servico)
+    // ✅ NOVO: Relacionamento com Serviço
+    @ManyToOne
+    @JoinColumn(name = "servico_id")
+    private Servico servico;
+
+    // ✅ NOVO: Relacionamento com Programa Social
+    @ManyToOne
+    @JoinColumn(name = "programa_id")
+    private ProgramaSocial programa;
 
     @Column(nullable = false)
     private LocalDateTime data;

@@ -1,19 +1,19 @@
-package br.gov.pmr.cad_familias.service.programa;
+package br.gov.pmr.cad_familias.service.servico;
 
 import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
-import br.gov.pmr.cad_familias.domain.familia.Familia;
-import br.gov.pmr.cad_familias.domain.programa.ProgramaSocial;
+import br.gov.pmr.cad_familias.domain.familia.Pessoa;
 import br.gov.pmr.cad_familias.domain.programa.StatusVinculo;
-import br.gov.pmr.cad_familias.domain.programa.VinculoFamiliaPrograma;
+import br.gov.pmr.cad_familias.domain.servico.Servico;
+import br.gov.pmr.cad_familias.domain.servico.VinculoPessoaServico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.programa.VinculoDesligamentoRequest;
-import br.gov.pmr.cad_familias.dto.programa.VinculoFamiliaProgramaRequest;
-import br.gov.pmr.cad_familias.dto.programa.VinculoFamiliaProgramaResponse;
+import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoRequest;
+import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoResponse;
 import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
-import br.gov.pmr.cad_familias.mapper.programa.VinculoFamiliaProgramaMapper;
-import br.gov.pmr.cad_familias.repository.familia.FamiliaRepository;
-import br.gov.pmr.cad_familias.repository.programa.ProgramaSocialRepository;
-import br.gov.pmr.cad_familias.repository.programa.VinculoFamiliaProgramaRepository;
+import br.gov.pmr.cad_familias.mapper.servico.VinculoPessoaServicoMapper;
+import br.gov.pmr.cad_familias.repository.familia.PessoaRepository;
+import br.gov.pmr.cad_familias.repository.servico.ServicoRepository;
+import br.gov.pmr.cad_familias.repository.servico.VinculoPessoaServicoRepository;
 import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
 import br.gov.pmr.cad_familias.service.audit.AuditService;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,65 +24,81 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class VinculoFamiliaProgramaService {
+public class VinculoPessoaServicoService {
 
-    private final VinculoFamiliaProgramaRepository vinculoRepository;
-    private final FamiliaRepository familiaRepository;
-    private final ProgramaSocialRepository programaRepository;
-    private final VinculoFamiliaProgramaMapper mapper;
+    private final VinculoPessoaServicoRepository vinculoRepository;
+    private final PessoaRepository pessoaRepository;
+    private final ServicoRepository servicoRepository;
+    private final VinculoPessoaServicoMapper mapper;
     private final AuditService auditService;
     private final UsuarioRepository usuarioRepository;
 
-    public VinculoFamiliaProgramaService(
-            VinculoFamiliaProgramaRepository vinculoRepository,
-            FamiliaRepository familiaRepository,
-            ProgramaSocialRepository programaRepository,
-            VinculoFamiliaProgramaMapper mapper,
+    public VinculoPessoaServicoService(
+            VinculoPessoaServicoRepository vinculoRepository,
+            PessoaRepository pessoaRepository,
+            ServicoRepository servicoRepository,
+            VinculoPessoaServicoMapper mapper,
             AuditService auditService,
             UsuarioRepository usuarioRepository
     ) {
         this.vinculoRepository = vinculoRepository;
-        this.familiaRepository = familiaRepository;
-        this.programaRepository = programaRepository;
+        this.pessoaRepository = pessoaRepository;
+        this.servicoRepository = servicoRepository;
         this.mapper = mapper;
         this.auditService = auditService;
         this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional
-    public VinculoFamiliaProgramaResponse vincular(VinculoFamiliaProgramaRequest request, Long usuarioId) {
-        Familia familia = familiaRepository.findById(request.getFamiliaId())
-                .orElseThrow(() -> new EntityNotFoundException("Família não encontrada: " + request.getFamiliaId()));
+    public VinculoPessoaServicoResponse vincular(VinculoPessoaServicoRequest request, Long usuarioId) {
+        Pessoa pessoa = pessoaRepository.findById(request.getPessoaId())
+                .orElseThrow(() -> new EntityNotFoundException("Pessoa não encontrada: " + request.getPessoaId()));
 
-        ProgramaSocial programa = programaRepository.findById(request.getProgramaId())
-                .orElseThrow(() -> new EntityNotFoundException("Programa social não encontrado: " + request.getProgramaId()));
+        Servico servico = servicoRepository.findById(request.getServicoId())
+                .orElseThrow(() -> new EntityNotFoundException("Serviço não encontrado: " + request.getServicoId()));
 
-        if (!programa.isAtivo()) {
-            throw new IllegalArgumentException("Não é possível vincular a um programa inativo: " + programa.getNome());
+        if (!servico.isAtivo()) {
+            throw new IllegalArgumentException("Não é possível vincular a um serviço inativo: " + servico.getNome());
         }
 
-        if (vinculoRepository.existsByFamiliaIdAndProgramaIdAndStatus(
-                request.getFamiliaId(), request.getProgramaId(), StatusVinculo.ATIVO)) {
+        // Verifica se já existe vínculo ativo
+        if (vinculoRepository.existsByPessoaIdAndServicoIdAndStatus(
+                request.getPessoaId(), request.getServicoId(), StatusVinculo.ATIVO)) {
             throw new IllegalArgumentException(
-                    "Família já possui vínculo ativo com o programa: " + programa.getNome()
+                    "Pessoa já possui vínculo ativo com o serviço: " + servico.getNome()
             );
         }
 
-        VinculoFamiliaPrograma entity = mapper.toEntity(request, familia, programa);
+        // Validação de faixa etária (se configurada no serviço)
+        if (servico.getFaixaEtariaMin() != null || servico.getFaixaEtariaMax() != null) {
+            int idade = pessoa.getIdade();
+            if (servico.getFaixaEtariaMin() != null && idade < servico.getFaixaEtariaMin()) {
+                throw new IllegalArgumentException(
+                        "Pessoa não atende à idade mínima (" + servico.getFaixaEtariaMin() + " anos) do serviço"
+                );
+            }
+            if (servico.getFaixaEtariaMax() != null && idade > servico.getFaixaEtariaMax()) {
+                throw new IllegalArgumentException(
+                        "Pessoa excede a idade máxima (" + servico.getFaixaEtariaMax() + " anos) do serviço"
+                );
+            }
+        }
+
+        VinculoPessoaServico entity = mapper.toEntity(request, pessoa, servico);
         entity.setCriadoPor(usuarioId);
 
         // ✅ Salva
-        VinculoFamiliaPrograma entitySalva = vinculoRepository.save(entity);
+        VinculoPessoaServico entitySalva = vinculoRepository.save(entity);
 
         // ✅ Converte
-        VinculoFamiliaProgramaResponse resultado = mapper.toResponse(entitySalva);
+        VinculoPessoaServicoResponse resultado = mapper.toResponse(entitySalva);
 
         // ✅ Auditoria (INSERT)
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException());
 
         auditService.registrar(
-                "vinculo_familia_programa",
+                "vinculo_pessoa_servico",
                 entitySalva.getId(),
                 AcaoAudit.INSERT,
                 null,
@@ -94,12 +110,12 @@ public class VinculoFamiliaProgramaService {
     }
 
     @Transactional
-    public VinculoFamiliaProgramaResponse desligar(Long vinculoId, VinculoDesligamentoRequest request, Long usuarioId) {
-        VinculoFamiliaPrograma entity = vinculoRepository.findById(vinculoId)
+    public VinculoPessoaServicoResponse desligar(Long vinculoId, VinculoDesligamentoRequest request, Long usuarioId) {
+        VinculoPessoaServico entity = vinculoRepository.findById(vinculoId)
                 .orElseThrow(() -> new EntityNotFoundException("Vínculo não encontrado: " + vinculoId));
 
         // ✅ Estado ANTES
-        VinculoFamiliaProgramaResponse estadoAnterior = mapper.toResponse(entity);
+        VinculoPessoaServicoResponse estadoAnterior = mapper.toResponse(entity);
 
         if (entity.getStatus() != StatusVinculo.ATIVO) {
             throw new IllegalArgumentException("Somente vínculos ativos podem ser desligados. Status atual: " + entity.getStatus());
@@ -115,17 +131,17 @@ public class VinculoFamiliaProgramaService {
         entity.setAtualizadoPor(usuarioId);
 
         // ✅ Salva
-        VinculoFamiliaPrograma entitySalva = vinculoRepository.save(entity);
+        VinculoPessoaServico entitySalva = vinculoRepository.save(entity);
 
         // ✅ Estado DEPOIS
-        VinculoFamiliaProgramaResponse estadoNovo = mapper.toResponse(entitySalva);
+        VinculoPessoaServicoResponse estadoNovo = mapper.toResponse(entitySalva);
 
         // ✅ Auditoria
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException());
 
         auditService.registrar(
-                "vinculo_familia_programa",
+                "vinculo_pessoa_servico",
                 entitySalva.getId(),
                 AcaoAudit.UPDATE,
                 estadoAnterior,
@@ -137,12 +153,12 @@ public class VinculoFamiliaProgramaService {
     }
 
     @Transactional
-    public VinculoFamiliaProgramaResponse suspender(Long vinculoId, Long usuarioId) {
-        VinculoFamiliaPrograma entity = vinculoRepository.findById(vinculoId)
+    public VinculoPessoaServicoResponse suspender(Long vinculoId, Long usuarioId) {
+        VinculoPessoaServico entity = vinculoRepository.findById(vinculoId)
                 .orElseThrow(() -> new EntityNotFoundException("Vínculo não encontrado: " + vinculoId));
 
         // ✅ Estado ANTES
-        VinculoFamiliaProgramaResponse estadoAnterior = mapper.toResponse(entity);
+        VinculoPessoaServicoResponse estadoAnterior = mapper.toResponse(entity);
 
         if (entity.getStatus() != StatusVinculo.ATIVO) {
             throw new IllegalArgumentException("Somente vínculos ativos podem ser suspensos. Status atual: " + entity.getStatus());
@@ -152,17 +168,17 @@ public class VinculoFamiliaProgramaService {
         entity.setAtualizadoPor(usuarioId);
 
         // ✅ Salva
-        VinculoFamiliaPrograma entitySalva = vinculoRepository.save(entity);
+        VinculoPessoaServico entitySalva = vinculoRepository.save(entity);
 
         // ✅ Estado DEPOIS
-        VinculoFamiliaProgramaResponse estadoNovo = mapper.toResponse(entitySalva);
+        VinculoPessoaServicoResponse estadoNovo = mapper.toResponse(entitySalva);
 
         // ✅ Auditoria
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException());
 
         auditService.registrar(
-                "vinculo_familia_programa",
+                "vinculo_pessoa_servico",
                 entitySalva.getId(),
                 AcaoAudit.UPDATE,
                 estadoAnterior,
@@ -174,12 +190,12 @@ public class VinculoFamiliaProgramaService {
     }
 
     @Transactional
-    public VinculoFamiliaProgramaResponse reativar(Long vinculoId, Long usuarioId) {
-        VinculoFamiliaPrograma entity = vinculoRepository.findById(vinculoId)
+    public VinculoPessoaServicoResponse reativar(Long vinculoId, Long usuarioId) {
+        VinculoPessoaServico entity = vinculoRepository.findById(vinculoId)
                 .orElseThrow(() -> new EntityNotFoundException("Vínculo não encontrado: " + vinculoId));
 
         // ✅ Estado ANTES
-        VinculoFamiliaProgramaResponse estadoAnterior = mapper.toResponse(entity);
+        VinculoPessoaServicoResponse estadoAnterior = mapper.toResponse(entity);
 
         if (entity.getStatus() != StatusVinculo.SUSPENSO) {
             throw new IllegalArgumentException("Somente vínculos suspensos podem ser reativados. Status atual: " + entity.getStatus());
@@ -191,17 +207,17 @@ public class VinculoFamiliaProgramaService {
         entity.setAtualizadoPor(usuarioId);
 
         // ✅ Salva
-        VinculoFamiliaPrograma entitySalva = vinculoRepository.save(entity);
+        VinculoPessoaServico entitySalva = vinculoRepository.save(entity);
 
         // ✅ Estado DEPOIS
-        VinculoFamiliaProgramaResponse estadoNovo = mapper.toResponse(entitySalva);
+        VinculoPessoaServicoResponse estadoNovo = mapper.toResponse(entitySalva);
 
         // ✅ Auditoria
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException());
 
         auditService.registrar(
-                "vinculo_familia_programa",
+                "vinculo_pessoa_servico",
                 entitySalva.getId(),
                 AcaoAudit.UPDATE,
                 estadoAnterior,
@@ -213,39 +229,39 @@ public class VinculoFamiliaProgramaService {
     }
 
     @Transactional(readOnly = true)
-    public VinculoFamiliaProgramaResponse buscarPorId(Long id) {
-        VinculoFamiliaPrograma entity = vinculoRepository.findById(id)
+    public VinculoPessoaServicoResponse buscarPorId(Long id) {
+        VinculoPessoaServico entity = vinculoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vínculo não encontrado: " + id));
         return mapper.toResponse(entity);
     }
 
     @Transactional(readOnly = true)
-    public List<VinculoFamiliaProgramaResponse> listarPorFamilia(Long familiaId) {
-        return vinculoRepository.findByFamiliaId(familiaId)
+    public List<VinculoPessoaServicoResponse> listarPorPessoa(Long pessoaId) {
+        return vinculoRepository.findByPessoaId(pessoaId)
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<VinculoFamiliaProgramaResponse> listarAtivosPorFamilia(Long familiaId) {
-        return vinculoRepository.findByFamiliaIdAndStatus(familiaId, StatusVinculo.ATIVO)
+    public List<VinculoPessoaServicoResponse> listarAtivosPorPessoa(Long pessoaId) {
+        return vinculoRepository.findByPessoaIdAndStatus(pessoaId, StatusVinculo.ATIVO)
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<VinculoFamiliaProgramaResponse> listarPorPrograma(Long programaId) {
-        return vinculoRepository.findByProgramaId(programaId)
+    public List<VinculoPessoaServicoResponse> listarPorServico(Long servicoId) {
+        return vinculoRepository.findByServicoId(servicoId)
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<VinculoFamiliaProgramaResponse> listarAtivosPorPrograma(Long programaId) {
-        return vinculoRepository.findByProgramaIdAndStatus(programaId, StatusVinculo.ATIVO)
+    public List<VinculoPessoaServicoResponse> listarAtivosPorServico(Long servicoId) {
+        return vinculoRepository.findByServicoIdAndStatus(servicoId, StatusVinculo.ATIVO)
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());

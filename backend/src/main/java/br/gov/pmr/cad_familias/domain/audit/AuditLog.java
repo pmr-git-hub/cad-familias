@@ -2,12 +2,16 @@ package br.gov.pmr.cad_familias.domain.audit;
 
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "audit_log")
+@Getter
+@Setter
 public class AuditLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,27 +48,4 @@ public class AuditLog implements Serializable {
         this.feitoEm = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTabela() { return tabela; }
-    public void setTabela(String tabela) { this.tabela = tabela; }
-
-    public Long getRegistroId() { return registroId; }
-    public void setRegistroId(Long registroId) { this.registroId = registroId; }
-
-    public AcaoAudit getAcao() { return acao; }
-    public void setAcao(AcaoAudit acao) { this.acao = acao; }
-
-    public String getDadosAntes() { return dadosAntes; }
-    public void setDadosAntes(String dadosAntes) { this.dadosAntes = dadosAntes; }
-
-    public String getDadosDepois() { return dadosDepois; }
-    public void setDadosDepois(String dadosDepois) { this.dadosDepois = dadosDepois; }
-
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-
-    public LocalDateTime getFeitoEm() { return feitoEm; }
-    public void setFeitoEm(LocalDateTime feitoEm) { this.feitoEm = feitoEm; }
 }

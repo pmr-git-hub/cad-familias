@@ -1,17 +1,19 @@
 package br.gov.pmr.cad_familias.service.equipamento;
 
+import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
-import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import br.gov.pmr.cad_familias.domain.tecnico.TecnicoEquipamento;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.equipamento.EquipamentoAtualizacaoDTO;
-import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
+import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.repository.equipamento.EquipamentoRepository;
 import br.gov.pmr.cad_familias.repository.tecnico.TecnicoEquipamentoRepository;
-import br.gov.pmr.cad_familias.repository.tecnico.TecnicoRepository;
 import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
+import br.gov.pmr.cad_familias.service.audit.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,16 +22,40 @@ public class EquipamentoService {
 
     @Autowired
     private EquipamentoRepository equipamentoRepository;
-    private TecnicoRepository tecnicoRepository;
+
+    @Autowired
     private TecnicoEquipamentoRepository tecnicoEquipamentoRepository;
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private AuditService auditService;
+
+    @Transactional
     public Equipamento criarEquipamento(Equipamento equipamento, Long usuarioId) {
         equipamento.setCriadoEm(LocalDateTime.now());
         equipamento.setCriadoPor(usuarioId);
         equipamento.setAtualizadoEm(LocalDateTime.now());
         equipamento.setAtualizadoPor(usuarioId);
-        return equipamentoRepository.save(equipamento);
+
+        // ✅ Salva
+        Equipamento equipamentoSalvo = equipamentoRepository.save(equipamento);
+
+        // ✅ Auditoria (INSERT)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "equipamento",
+                equipamentoSalvo.getId(),
+                AcaoAudit.INSERT,
+                null,
+                equipamentoSalvo,
+                usuario
+        );
+
+        return equipamentoSalvo;
     }
 
     public List<Equipamento> listarEquipamentos() {
@@ -40,19 +66,21 @@ public class EquipamentoService {
         return equipamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Equipamento não encontrado"));
     }
-    public List<Equipamento> listarEquipamentosTecnico(Long usuarioId) {
 
+    public List<Equipamento> listarEquipamentosTecnico(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
         List<TecnicoEquipamento> vinculos =
                 tecnicoEquipamentoRepository.findByTecnicoIdAndAtivoTrue(usuario.getTecnico().getId());
 
-
         return vinculos.stream().map(TecnicoEquipamento::getEquipamento).toList();
     }
 
-
+    @Transactional
     public Equipamento atualizarEquipamentoParcial(Long id, EquipamentoAtualizacaoDTO equipamentoDTO, Long usuarioId) {
         Equipamento equipamento = buscarEquipamentoPorId(id);
+
+        // ✅ Captura estado ANTES (cópia simples dos campos relevantes)
+        Equipamento estadoAnterior = copiarEquipamento(equipamento);
 
         if (equipamentoDTO.getNome() != null) {
             equipamento.setNome(equipamentoDTO.getNome());
@@ -93,8 +121,42 @@ public class EquipamentoService {
 
         equipamento.setAtualizadoEm(LocalDateTime.now());
         equipamento.setAtualizadoPor(usuarioId);
-        return equipamentoRepository.save(equipamento);
+
+        // ✅ Salva
+        Equipamento equipamentoSalvo = equipamentoRepository.save(equipamento);
+
+        // ✅ Auditoria (UPDATE)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "equipamento",
+                equipamentoSalvo.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                equipamentoSalvo,
+                usuario
+        );
+
+        return equipamentoSalvo;
     }
 
-
+    // ✅ Método auxiliar para copiar equipamento (snapshot simples)
+    private Equipamento copiarEquipamento(Equipamento original) {
+        Equipamento copia = new Equipamento();
+        copia.setId(original.getId());
+        copia.setNome(original.getNome());
+        copia.setTipo(original.getTipo());
+        copia.setCep(original.getCep());
+        copia.setLogradouro(original.getLogradouro());
+        copia.setNumero(original.getNumero());
+        copia.setComplemento(original.getComplemento());
+        copia.setBairro(original.getBairro());
+        copia.setCidade(original.getCidade());
+        copia.setEstado(original.getEstado());
+        copia.setTelefone(original.getTelefone());
+        copia.setEmail(original.getEmail());
+        copia.setAtivo(original.isAtivo());
+        return copia;
+    }
 }

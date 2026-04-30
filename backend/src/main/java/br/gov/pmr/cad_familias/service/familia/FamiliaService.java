@@ -2,6 +2,12 @@ package br.gov.pmr.cad_familias.service.familia;
 
 import java.util.List;
 
+import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
+import br.gov.pmr.cad_familias.domain.usuario.Usuario;
+import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
+import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
+import br.gov.pmr.cad_familias.service.audit.AuditService;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Service;
 
 import br.gov.pmr.cad_familias.dto.familia.FamiliaDTO;
@@ -17,9 +23,13 @@ import jakarta.transaction.Transactional;
 public class FamiliaService {
 
 	private final FamiliaRepository repositorioFamilia;
+	private final AuditService auditService;
+	private final UsuarioRepository usuarioRepository;
 
-	public FamiliaService(FamiliaRepository repositorioFamilia) {
+	public FamiliaService(FamiliaRepository repositorioFamilia,AuditService auditService, UsuarioRepository usuarioRepository) {
 		this.repositorioFamilia = repositorioFamilia;
+		this.usuarioRepository = usuarioRepository;
+		this.auditService = auditService;
 	}
 
 	public List<FamiliaDTO> listarFamilias() {
@@ -62,15 +72,38 @@ public class FamiliaService {
 			membro.setCriadoPor(usuarioId);
 		});
 
-		return FamiliaMapper.familiaToFamiliaVo(repositorioFamilia.save(familia));
+		// ✅ Salva
+		Familia familiaSalva = repositorioFamilia.save(familia);
+
+		// ✅ Converte para DTO
+		FamiliaDTO resultado = FamiliaMapper.familiaToFamiliaVo(familiaSalva);
+
+		// ✅ Registra auditoria (INSERT não tem "antes")
+		Usuario usuario = usuarioRepository.findById(usuarioId)
+				.orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+		auditService.registrar(
+				"familia",
+				familiaSalva.getId(),
+				AcaoAudit.INSERT,
+				null,         // ✅ dadosAntes = null (criação)
+				resultado,    // ✅ dadosDepois = família criada
+				usuario
+		);
+
+		return resultado;
 	}
+
 
 	@Transactional
 	public FamiliaDTO editarFamilia(Long id, FamiliaDTO familiaEditar, Long usuarioId) {
 		Familia familiaAtual = repositorioFamilia.findById(id)
 				.orElseThrow(FamiliaNaoEncontradaException::new);
 
-		// === 1. Atualiza campos simples da família (parcial) ===
+		// ✅ 1. CAPTURA O ESTADO ANTERIOR (snapshot JSON)
+		FamiliaDTO estadoAnterior = FamiliaMapper.familiaToFamiliaVo(familiaAtual);
+
+		// === 2. Atualiza campos simples da família (parcial) ===
 		if (familiaEditar.getCodigoCadunico() != null) {
 			familiaAtual.setCodigoCadunico(familiaEditar.getCodigoCadunico());
 		}
@@ -78,7 +111,7 @@ public class FamiliaService {
 			familiaAtual.setSituacao(familiaEditar.getSituacao());
 		}
 
-		// === 2. Só atualiza membros se veio pessoaReferencia no DTO ===
+		// === 3. Só atualiza membros se veio pessoaReferencia no DTO ===
 		boolean temAtualizacaoDeMembros = familiaEditar.getPessoaReferencia() != null;
 
 		if (temAtualizacaoDeMembros) {
@@ -125,11 +158,28 @@ public class FamiliaService {
 					});
 		}
 
-		// Auditoria da família
+		// === 4. Auditoria da família ===
 		familiaAtual.setAtualizadoPor(usuarioId);
 
-		return FamiliaMapper.familiaToFamiliaVo(repositorioFamilia.save(familiaAtual));
+		Familia familiaSalva = repositorioFamilia.save(familiaAtual);
+
+		FamiliaDTO estadoNovo = FamiliaMapper.familiaToFamiliaVo(familiaSalva);
+
+		Usuario usuario = usuarioRepository.findById(usuarioId)
+				.orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+		auditService.registrar(
+				"familia",
+				familiaSalva.getId(),
+				AcaoAudit.UPDATE,
+				estadoAnterior,
+				estadoNovo,
+				usuario
+		);
+
+		return estadoNovo;
 	}
+
 
 
 	private void atualizarDadosPessoa(Pessoa existente, Pessoa editada) {

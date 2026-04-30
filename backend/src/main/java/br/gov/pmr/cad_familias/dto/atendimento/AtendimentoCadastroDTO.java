@@ -14,6 +14,10 @@ public record AtendimentoCadastroDTO(
 
         Long pessoaId,  // opcional — null = atendimento à família toda
 
+        Long servicoId,
+
+        Long programaId,
+
         @NotNull(message = "Data do atendimento é obrigatória")
         LocalDateTime data,
 

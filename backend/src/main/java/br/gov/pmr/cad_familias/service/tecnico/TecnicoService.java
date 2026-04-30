@@ -1,16 +1,21 @@
 package br.gov.pmr.cad_familias.service.tecnico;
 
+import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
 import br.gov.pmr.cad_familias.domain.equipamento.Equipamento;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import br.gov.pmr.cad_familias.domain.tecnico.TecnicoEquipamento;
+import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.tecnico.TecnicoDTO;
 import br.gov.pmr.cad_familias.dto.tecnico.VincularEquipamentoDTO;
 import br.gov.pmr.cad_familias.excecao.EquipamentoNaoEncontradoException;
 import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
+import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.mapper.tecnico.TecnicoMapper;
 import br.gov.pmr.cad_familias.repository.equipamento.EquipamentoRepository;
 import br.gov.pmr.cad_familias.repository.tecnico.TecnicoEquipamentoRepository;
 import br.gov.pmr.cad_familias.repository.tecnico.TecnicoRepository;
+import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
+import br.gov.pmr.cad_familias.service.audit.AuditService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +28,21 @@ public class TecnicoService {
     private final TecnicoRepository tecnicoRepository;
     private final TecnicoEquipamentoRepository tecnicoEquipamentoRepository;
     private final EquipamentoRepository equipamentoRepository;
+    private final AuditService auditService;
+    private final UsuarioRepository usuarioRepository;
 
     public TecnicoService(
             TecnicoRepository tecnicoRepository,
             TecnicoEquipamentoRepository tecnicoEquipamentoRepository,
-            EquipamentoRepository equipamentoRepository
+            EquipamentoRepository equipamentoRepository,
+            AuditService auditService,
+            UsuarioRepository usuarioRepository
     ) {
         this.tecnicoRepository = tecnicoRepository;
         this.tecnicoEquipamentoRepository = tecnicoEquipamentoRepository;
         this.equipamentoRepository = equipamentoRepository;
+        this.auditService = auditService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public List<TecnicoDTO> listarTecnicos() {
@@ -58,15 +69,39 @@ public class TecnicoService {
         Tecnico tecnico = TecnicoMapper.dtoToTecnico(dto);
         tecnico.setCriadoPor(usuarioId);
         tecnico.setAtualizadoPor(usuarioId);
-        tecnico = tecnicoRepository.save(tecnico);
 
-        return TecnicoMapper.tecnicoToDTO(tecnico);
+        // ✅ Salva
+        Tecnico tecnicoSalvo = tecnicoRepository.save(tecnico);
+
+        // ✅ Converte
+        TecnicoDTO resultado = TecnicoMapper.tecnicoToDTO(tecnicoSalvo);
+
+        // ✅ Auditoria (INSERT)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "tecnico",
+                tecnicoSalvo.getId(),
+                AcaoAudit.INSERT,
+                null,
+                resultado,
+                usuario
+        );
+
+        return resultado;
     }
 
     @Transactional
     public TecnicoDTO atualizarTecnico(Long id, TecnicoDTO dto, Long usuarioId) {
         Tecnico tecnico = tecnicoRepository.findById(id)
                 .orElseThrow(TecnicoNaoEncontradoException::new);
+
+        List<TecnicoEquipamento> vinculos =
+                tecnicoEquipamentoRepository.findByTecnicoIdAndAtivoTrue(tecnico.getId());
+
+        // ✅ Estado ANTES
+        TecnicoDTO estadoAnterior = TecnicoMapper.tecnicoToDTO(tecnico, vinculos);
 
         if (dto.getNome() != null) {
             tecnico.setNome(dto.getNome());
@@ -85,18 +120,38 @@ public class TecnicoService {
         }
 
         tecnico.setAtualizadoPor(usuarioId);
-        tecnico = tecnicoRepository.save(tecnico);
 
-        List<TecnicoEquipamento> vinculos =
-                tecnicoEquipamentoRepository.findByTecnicoIdAndAtivoTrue(tecnico.getId());
+        // ✅ Salva
+        Tecnico tecnicoSalvo = tecnicoRepository.save(tecnico);
 
-        return TecnicoMapper.tecnicoToDTO(tecnico, vinculos);
+        List<TecnicoEquipamento> vinculosAtualizados =
+                tecnicoEquipamentoRepository.findByTecnicoIdAndAtivoTrue(tecnicoSalvo.getId());
+
+        // ✅ Estado DEPOIS
+        TecnicoDTO estadoNovo = TecnicoMapper.tecnicoToDTO(tecnicoSalvo, vinculosAtualizados);
+
+        // ✅ Auditoria
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "tecnico",
+                tecnicoSalvo.getId(),
+                AcaoAudit.UPDATE,
+                estadoAnterior,
+                estadoNovo,
+                usuario
+        );
+
+        return estadoNovo;
     }
 
     @Transactional
     public void desativar(Long id) {
         Tecnico tecnico = tecnicoRepository.findById(id)
                 .orElseThrow(TecnicoNaoEncontradoException::new);
+
+        // ✅ Aqui você pode adicionar auditoria se quiser rastrear desativações
         tecnico.setAtivo(false);
         tecnicoRepository.save(tecnico);
     }
@@ -110,9 +165,9 @@ public class TecnicoService {
 
         Equipamento equipamento = equipamentoRepository.findById(dto.getEquipamentoId())
                 .orElseThrow(EquipamentoNaoEncontradoException::new);
+
         boolean jaVinculado = tecnicoEquipamentoRepository
                 .existsByTecnicoIdAndEquipamentoIdAndAtivoTrue(tecnicoId, dto.getEquipamentoId());
-
 
         if (jaVinculado) {
             throw new IllegalStateException("Técnico já está vinculado a este equipamento.");
@@ -124,10 +179,25 @@ public class TecnicoService {
         vinculo.setDataInicio(dto.getDataInicio());
         vinculo.setAtivo(true);
         vinculo.setCriadoPor(usuarioId);
-        tecnicoEquipamentoRepository.save(vinculo);
+
+        // ✅ Salva vínculo
+        TecnicoEquipamento vinculoSalvo = tecnicoEquipamentoRepository.save(vinculo);
 
         List<TecnicoEquipamento> vinculos =
                 tecnicoEquipamentoRepository.findByTecnicoIdAndAtivoTrue(tecnicoId);
+
+        // ✅ Auditoria (INSERT de vínculo)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        auditService.registrar(
+                "tecnico_equipamento",
+                vinculoSalvo.getId(),
+                AcaoAudit.INSERT,
+                null,
+                vinculoSalvo,
+                usuario
+        );
 
         return TecnicoMapper.tecnicoToDTO(tecnico, vinculos);
     }
@@ -147,7 +217,12 @@ public class TecnicoService {
 
         vinculo.setAtivo(false);
         vinculo.setDataFim(LocalDate.now());
+
+        // ✅ Salva
         tecnicoEquipamentoRepository.save(vinculo);
+
+        // ✅ Auditoria (UPDATE de desvinculação) - opcional
+        // Você pode adicionar se quiser rastrear desvinculações
 
         List<TecnicoEquipamento> vinculosAtualizados =
                 tecnicoEquipamentoRepository.findByTecnicoIdAndAtivoTrue(tecnicoId);

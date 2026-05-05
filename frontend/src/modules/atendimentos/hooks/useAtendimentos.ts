@@ -21,7 +21,7 @@ export function useCadastrarAtendimento(prontuarioId: number) {
         ...dto,
         data: `${format(dto.data, 'yyyy-MM-dd')}T00:00:00`,
       }
-      return atendimentoService.cadastrar(payload).then(r => r.data)
+      return atendimentoService.cadastrar(payload)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['atendimentos', prontuarioId] })

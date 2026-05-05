@@ -1,10 +1,16 @@
-// src/components/atendimento/FormAtendimento.tsx
+// src/modules/atendimentos/components/FormAtendimento.tsx
+'use client'
 
 import { useState } from 'react'
-import { useCadastrarAtendimento } from '../hooks/useAtendimentos' 
+import { useCadastrarAtendimento } from '../hooks/useAtendimentos'
 import { SeletorPessoa } from './SeletorPessoa'
-import type { FamiliaDTO } from '@/modules/familias/types/familia' 
-import type { TipoAtendimento, ModalidadeAtendimento } from  './../types/enums'
+import {
+  TIPO_ATENDIMENTO_LABELS,
+  MODALIDADE_ATENDIMENTO_LABELS,
+  type TipoAtendimento,
+  type ModalidadeAtendimento,
+} from '../types/enums'
+import type { FamiliaDTO } from '@/modules/familias/types/familia'
 
 interface Props {
   prontuarioId: number
@@ -15,11 +21,11 @@ interface Props {
 export function FormAtendimento({ prontuarioId, familia, onSucesso }: Props) {
   const { mutate, isPending } = useCadastrarAtendimento(prontuarioId)
 
-  const [pessoaId, setPessoaId] = useState<number | null>(null)
-  const [data, setData] = useState('')
-  const [tipo, setTipo] = useState<TipoAtendimento>('INDIVIDUAL')
-  const [modalidade, setModalidade] = useState<ModalidadeAtendimento>('PRESENCIAL')
-  const [descricao, setDescricao] = useState('')
+  const [pessoaId, setPessoaId]     = useState<number | null>(null)
+  const [data, setData]             = useState('')
+  const [tipo, setTipo]             = useState<TipoAtendimento>('ATENDIMENTO_PRESENCIAL')
+  const [modalidade, setModalidade] = useState<ModalidadeAtendimento>('INDIVIDUAL')
+  const [descricao, setDescricao]   = useState('')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -59,10 +65,11 @@ export function FormAtendimento({ prontuarioId, familia, onSucesso }: Props) {
           onChange={e => setTipo(e.target.value as TipoAtendimento)}
           className="border rounded px-3 py-2 text-sm"
         >
-          <option value="INDIVIDUAL">Individual</option>
-          <option value="FAMILIAR">Familiar</option>
-          <option value="GRUPO">Grupo</option>
-          <option value="VISITA_DOMICILIAR">Visita Domiciliar</option>
+          {(Object.entries(TIPO_ATENDIMENTO_LABELS) as [TipoAtendimento, string][]).map(
+            ([val, label]) => (
+              <option key={val} value={val}>{label}</option>
+            )
+          )}
         </select>
       </div>
 
@@ -73,9 +80,11 @@ export function FormAtendimento({ prontuarioId, familia, onSucesso }: Props) {
           onChange={e => setModalidade(e.target.value as ModalidadeAtendimento)}
           className="border rounded px-3 py-2 text-sm"
         >
-          <option value="PRESENCIAL">Presencial</option>
-          <option value="REMOTO">Remoto</option>
-          <option value="DOMICILIAR">Domiciliar</option>
+          {(Object.entries(MODALIDADE_ATENDIMENTO_LABELS) as [ModalidadeAtendimento, string][]).map(
+            ([val, label]) => (
+              <option key={val} value={val}>{label}</option>
+            )
+          )}
         </select>
       </div>
 
@@ -86,6 +95,7 @@ export function FormAtendimento({ prontuarioId, familia, onSucesso }: Props) {
           onChange={e => setDescricao(e.target.value)}
           required
           rows={4}
+          placeholder="Descreva o atendimento realizado..."
           className="border rounded px-3 py-2 text-sm resize-none"
         />
       </div>

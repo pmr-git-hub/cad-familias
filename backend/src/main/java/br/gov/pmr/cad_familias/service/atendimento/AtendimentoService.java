@@ -12,6 +12,7 @@ import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.atendimento.AtendimentoAtualizacaoDTO;
 import br.gov.pmr.cad_familias.dto.atendimento.AtendimentoCadastroDTO;
 import br.gov.pmr.cad_familias.dto.atendimento.AtendimentoRespostaDTO;
+import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
 import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.repository.atendimento.AtendimentoRepository;
 import br.gov.pmr.cad_familias.repository.atendimento.ProntuarioRepository;
@@ -71,8 +72,11 @@ public class AtendimentoService {
             throw new IllegalStateException("Não é possível registrar atendimento em prontuário que não está aberto.");
         }
 
-        Tecnico tecnico = tecnicoRepository.findById(usuarioId)
-                .orElseThrow(() -> new EntityNotFoundException("Técnico não encontrado para o usuário logado."));
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        Tecnico tecnico = tecnicoRepository.findById(usuario.getTecnico().getId())
+                .orElseThrow(() -> new TecnicoNaoEncontradoException());
 
         boolean vinculado = tecnicoEquipamentoRepository
                 .existsByTecnicoIdAndEquipamentoIdAndAtivoTrue(
@@ -117,15 +121,9 @@ public class AtendimentoService {
         atendimento.setDescricao(dto.descricao());
         atendimento.setCriadoPor(usuarioId);
 
-        // ✅ Salva
         Atendimento atendimentoSalvo = atendimentoRepository.save(atendimento);
 
-        // ✅ Converte para DTO
         AtendimentoRespostaDTO resultado = AtendimentoRespostaDTO.fromEntity(atendimentoSalvo);
-
-        // ✅ Auditoria (INSERT)
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNaoEncontradoException());
 
         auditService.registrar(
                 "atendimento",

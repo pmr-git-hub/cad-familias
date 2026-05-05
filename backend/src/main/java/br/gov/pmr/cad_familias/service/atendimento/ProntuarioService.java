@@ -8,6 +8,7 @@ import br.gov.pmr.cad_familias.domain.familia.Familia;
 import br.gov.pmr.cad_familias.domain.tecnico.Tecnico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.atendimento.*;
+import br.gov.pmr.cad_familias.excecao.TecnicoNaoEncontradoException;
 import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.repository.atendimento.ProntuarioRepository;
 import br.gov.pmr.cad_familias.repository.equipamento.EquipamentoRepository;
@@ -19,6 +20,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -61,25 +63,23 @@ public class ProntuarioService {
         Equipamento equipamento = equipamentoRepository.findById(dto.equipamentoId())
                 .orElseThrow(() -> new EntityNotFoundException("Equipamento não encontrado."));
 
-        Tecnico tecnico = tecnicoRepository.findById(dto.tecnicoId())
-                .orElseThrow(() -> new EntityNotFoundException("Técnico não encontrado."));
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+
+        Tecnico tecnico = tecnicoRepository.findById(usuario.getTecnico().getId())
+                .orElseThrow(() -> new TecnicoNaoEncontradoException());
 
         Prontuario prontuario = new Prontuario();
         prontuario.setFamilia(familia);
         prontuario.setEquipamento(equipamento);
         prontuario.setTecnico(tecnico);
-        prontuario.setDataAbertura(dto.dataAbertura());
+        prontuario.setDataAbertura(LocalDate.now());
         prontuario.setCriadoPor(usuarioId);
 
-        // ✅ Salva
         Prontuario prontuarioSalvo = prontuarioRepository.save(prontuario);
 
-        // ✅ Converte
         ProntuarioRespostaDTO resultado = ProntuarioRespostaDTO.fromEntity(prontuarioSalvo);
 
-        // ✅ Auditoria (INSERT)
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNaoEncontradoException());
 
         auditService.registrar(
                 "prontuario",

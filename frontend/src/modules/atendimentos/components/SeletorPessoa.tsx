@@ -1,15 +1,19 @@
-// src/components/atendimento/SeletorPessoa.tsx
+// src/modules/atendimentos/components/SeletorPessoa.tsx
 
-import type { FamiliaDTO } from "@/modules/familias/types/familia" 
+import type { FamiliaDTO, PessoaDTO } from '@/modules/familias/types/familia'
 
 interface Props {
   familia: FamiliaDTO
-  value: number | null         // null = família toda
+  value: number | null   // null = família toda
   onChange: (id: number | null) => void
 }
 
 export function SeletorPessoa({ familia, value, onChange }: Props) {
-  const todos = [familia.pessoaReferencia, ...familia.membrosDaFamilia]
+  const todos: PessoaDTO[] = [
+    familia.pessoaReferencia,
+    ...familia.membrosDaFamilia,
+  ]
+
   const isFamilia = value === null
 
   return (
@@ -29,7 +33,10 @@ export function SeletorPessoa({ familia, value, onChange }: Props) {
           <input
             type="radio"
             checked={!isFamilia}
-            onChange={() => onChange(todos[0].id ?? null)}
+            onChange={() => {
+              const primeiro = todos[0]?.id
+              if (primeiro != null) onChange(primeiro)
+            }}
           />
           Pessoa específica
         </label>
@@ -42,7 +49,9 @@ export function SeletorPessoa({ familia, value, onChange }: Props) {
           className="border rounded px-3 py-2 text-sm"
         >
           {todos.map(p => (
-            <option key={p.id} value={p.id}>{p.nome}</option>
+            <option key={p.id} value={p.id}>
+              {p.nome}
+            </option>
           ))}
         </select>
       )}

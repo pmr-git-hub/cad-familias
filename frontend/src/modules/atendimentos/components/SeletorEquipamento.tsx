@@ -1,6 +1,7 @@
 // src/modules/atendimentos/components/SeletorEquipamento.tsx
 
-import { useEquipamentosDoTecnico } from "../hooks/useEquipamentosDoTecnico"
+import { useEffect } from 'react'
+import { useEquipamentosDoTecnico } from '../hooks/useEquipamentosDoTecnico'
 
 interface Props {
   value: number | null
@@ -11,15 +12,24 @@ interface Props {
 export function SeletorEquipamento({ value, onChange, error }: Props) {
   const { data: equipamentos, isLoading } = useEquipamentosDoTecnico()
 
-  // Auto-seleciona se só tiver 1
-  if (!isLoading && equipamentos?.length === 1 && value !== equipamentos[0].id) {
-    onChange(equipamentos[0].id)
+  // Auto-seleciona se só houver 1 equipamento
+  useEffect(() => {
+    if (!isLoading && equipamentos?.length === 1 && value !== equipamentos[0].id) {
+      onChange(equipamentos[0].id)
+    }
+  }, [isLoading, equipamentos, value, onChange])
+
+  if (isLoading) {
+    return <p className="text-sm text-gray-500">Carregando equipamentos...</p>
   }
 
-  if (isLoading) return <p className="text-sm text-gray-500">Carregando equipamentos...</p>
-
-  if (!equipamentos?.length)
-    return <p className="text-sm text-red-500">Nenhum equipamento vinculado ao seu usuário.</p>
+  if (!equipamentos?.length) {
+    return (
+      <p className="text-sm text-red-500">
+        Nenhum equipamento vinculado ao seu usuário.
+      </p>
+    )
+  }
 
   if (equipamentos.length === 1) {
     return (
@@ -39,7 +49,9 @@ export function SeletorEquipamento({ value, onChange, error }: Props) {
       >
         <option value="">Selecione o equipamento</option>
         {equipamentos.map(eq => (
-          <option key={eq.id} value={eq.id}>{eq.nome}</option>
+          <option key={eq.id} value={eq.id}>
+            {eq.nome}
+          </option>
         ))}
       </select>
       {error && <span className="text-xs text-red-500">{error}</span>}

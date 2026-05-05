@@ -1,4 +1,6 @@
-// src/types/prontuario.ts
+// src/modules/atendimentos/types/prontuario.ts
+
+export type StatusProntuario = 'ABERTO' | 'ENCERRADO' | 'SUSPENSO'
 
 export interface ProntuarioRespostaDTO {
   id: number
@@ -9,7 +11,7 @@ export interface ProntuarioRespostaDTO {
   dataAbertura: string
   dataFechamento: string | null
   motivoEncerramento: string | null
-  ativo: boolean
+  status: StatusProntuario
 }
 
 export interface ProntuarioCadastroDTO {

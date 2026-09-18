@@ -152,12 +152,13 @@ export function ProntuariosPage({ familiaId, familia }: Props) {
                 Novo Atendimento
               </h4>
               <FormAtendimento
-                prontuarioId={prontuarioSelecionado.id}
+                prontuario={prontuarioSelecionado}
                 familia={familia}
                 onSucesso={() => setRegistrandoAtendimento(false)}
               />
             </div>
           )}
+
 
           {/* Form encerrar prontuário */}
           {encerrando && (
@@ -192,6 +193,7 @@ export function ProntuariosPage({ familiaId, familia }: Props) {
                       <span>{MODALIDADE_ATENDIMENTO_LABELS[a.modalidade]}</span>
                     </div>
                   </div>
+
                   {a.pessoaId && (
                     <p className="text-xs text-blue-600 mt-1">
                       Pessoa: {
@@ -200,6 +202,13 @@ export function ProntuariosPage({ familiaId, familia }: Props) {
                       }
                     </p>
                   )}
+
+                  {a.servicoNome && (
+                    <p className="text-xs text-purple-600 mt-1">
+                      Serviço: {a.servicoNome}
+                    </p>
+                  )}
+
                   <p className="text-gray-700 mt-1">{a.descricao}</p>
                   <p className="text-xs text-gray-400 mt-1">Técnico: {a.tecnicoNome}</p>
                 </div>

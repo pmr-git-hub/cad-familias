@@ -1,8 +1,8 @@
 # RESUMO GERAL DO PROJETO - CAD RIBEIRÃO
 
 **Sistema de Gestão Socioassistencial**  
-**Versão**: 2.0  
-**Última atualização**: 28/04/2026
+**Versão**: 2.2  
+**Última atualização**: 18/09/2026
 
 ---
 
@@ -14,7 +14,7 @@
 4. [Entidades Principais](#entidades-principais)
 5. [Segurança](#segurança)
 6. [Padrões Arquiteturais](#padrões-arquiteturais)
-7. [Regras de Negócio](#regras-de-negócio)
+7. [Regras de Negócio](#regras-de-negócio-implementadas)
 8. [Próximos Módulos](#próximos-módulos)
 9. [Banco de Dados](#banco-de-dados)
 10. [Como Executar](#como-executar)
@@ -33,6 +33,7 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 - Prontuários e atendimentos
 - Encaminhamentos entre equipamentos
 - Vínculos com programas sociais e serviços
+- Acompanhamento especializado (Gestação, MSE, Trabalho Infantil)
 - Auditoria completa de todas as operações
 
 ---
@@ -179,37 +180,41 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 | Módulo | Domain | Repository | Service | Controller | Migration | Auditoria | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Equipamento | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| Técnico | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| TécnicoEquipamento | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| Usuário | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
+| Técnico* | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
+| TécnicoEquipamento* | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
+| Usuário* | ✅ | ✅ | ✅ | ✅* | ✅ | ✅ | 100% |
 | Família | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
 | Pessoa | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| Programa Social | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| VinculoFamiliaPrograma | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| Serviço | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
+| Programa Social | ✅* | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
+| VinculoFamiliaPrograma* | ✅ | ✅ | ✅* | ✅ | ✅ | ✅ | 100% |
+| Serviço | ✅* | ✅ | ✅* | ✅ | ✅ | ✅ | 100% |
 | VinculoPessoaServico | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| Prontuário | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
+| Prontuário | ✅ | ✅ | ✅* | ✅ | ✅ | ✅ | 100% |
 | Atendimento | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
-| Encaminhamento | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
+| Encaminhamento | ✅ | ✅* | ✅ | ✅ | ✅ | ✅ | 100% |
 | AuditLog | ✅ | ✅ | ✅ | — | ✅ | — | 100% |
+| Gestacao | 🔄 | 🔄 | 🔄 | 🔄 | ✅ | 🔄* | Em desenvolvimento |
+| GestacaoAcompanhamento | 🔄 | 🔄 | 🔄 | 🔄 | ✅ | 🔄 | Em desenvolvimento |
 
 ### FRONTEND - CRUD IMPLEMENTADOS
 
 | Módulo | Listagem | Criação | Edição | Exclusão | Status |
 | --- | --- | --- | --- | --- | --- |
 | Equipamento | ✅ | ✅ | ✅ | ✅ | Completo |
-| Técnico | ✅ | ✅ | ✅ | ✅ | Completo |
-| Usuário | ✅ | ✅ | ✅ | ✅ | Completo |
-| Programa Social | ✅ | ✅ | ✅ | ✅ | Completo |
+| Técnico | ✅ | ✅ | ✅* | ✅ | Completo |
+| Usuário | ✅ | ✅* | ✅ | ✅ | Completo |
+| Programa Social* | ✅ | ✅ | ✅ | ✅ | Completo |
 | Serviço | ✅ | ✅ | ✅ | ✅ | Completo |
 | Família/Pessoa | ✅ | ✅ | ✅ | ✅ | Completo |
-| Prontuário | 🔄 | 🔄 | 🔄 | — | Em desenvolvimento |
+| Prontuário | 🔄* | 🔄 | 🔄 | — | Em desenvolvimento |
 | Atendimento | 🔄 | 🔄 | — | — | Em desenvolvimento |
+| Gestação | 🔴 | 🔴 | 🔴* | — | Não iniciado |
 
 **Legenda:**
 
 - ✅ Implementado e funcionando
 - 🔄 Em desenvolvimento
+- 🔴 Não iniciado
 - — Não aplicável
 
 ## ENTIDADES PRINCIPAIS
@@ -436,6 +441,8 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 | faixa_etaria_max | INTEGER | ❌ | Idade máxima |
 | dia_semana | VARCHAR(100) | ❌ | Ex: "segunda, quarta" |
 | horario | VARCHAR(100) | ❌ | Ex: "14h às 16h" |
+| tem_lista_presenca | BOOLEAN | ✅ | Se o serviço gera lista de presença/chamada |
+| tipo_acompanhamento | ENUM | ✅ | NENHUM, GESTACAO, MSE, TRABALHO_INFANTIL |
 | ativo | BOOLEAN | ✅ | Se está em funcionamento |
 | criado_em | TIMESTAMP | ✅ | Data de cadastro |
 | criado_por | BIGINT | ✅ | Usuário que cadastrou |
@@ -453,6 +460,25 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 **Constraints:**
 - CHECK (faixa_etaria_min <= faixa_etaria_max)
 - Unique: (nome, equipamento_id)
+
+**Comportamento por tipo_acompanhamento:**
+
+| Valor | Comportamento |
+| --- | --- |
+| NENHUM | Apenas vínculo + presença (se habilitado) |
+| GESTACAO | Ao vincular pessoa, cria Gestacao automaticamente |
+| MSE | Ao vincular pessoa, cria módulo de medida socioeducativa (futuro) |
+| TRABALHO_INFANTIL | Ao vincular pessoa, cria módulo de trabalho infantil (futuro) |
+
+**Validação de dados faltantes:**
+
+O sistema não bloqueia o vínculo, mas retorna alertas no response caso campos relevantes estejam ausentes na Pessoa:
+
+| tipo_acompanhamento | Campos verificados |
+| --- | --- |
+| GESTACAO | data_nascimento, sexo |
+| MSE | cpf, data_nascimento |
+| TRABALHO_INFANTIL | data_nascimento |
 
 8. VINCULO_PESSOA_SERVICO
 
@@ -480,8 +506,76 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 - data_entrada padrão = data atual
 - Status padrão = ATIVO
 - Validação de faixa etária (se definida no serviço)
+- Se o serviço tiver tipo_acompanhamento != NENHUM, o módulo correspondente é criado automaticamente após a criação do vínculo
 
-9. PROGRAMA SOCIAL
+**Response do POST (quando tipo_acompanhamento != NENHUM):**
+```json
+{
+  "vinculo": { "..." },
+  "gestacao": { "..." },
+  "alertas": [
+    "Campo 'sexo' não preenchido na pessoa",
+    "Campo 'data_nascimento' não preenchido na pessoa"
+  ]
+}
+```
+
+9. GESTACAO
+
+**Descrição**: Módulo de acompanhamento gestacional. Criado automaticamente ao vincular uma pessoa a um serviço com tipo_acompanhamento = GESTACAO.
+
+**Campos:**
+
+| Campo | Tipo | Obrigatório | Descrição |
+| --- | --- | --- | --- |
+| id | BIGINT | ✅ | Identificador único |
+| vinculo_id | BIGINT | ✅ | FK para VinculoPessoaServico (1:1) |
+| data_ultima_menstruacao | DATE | ❌ | Pode ser desconhecida |
+| data_prevista_parto | DATE | ❌ | Pode ser desconhecida |
+| status | ENUM | ✅ | EM_ACOMPANHAMENTO, POS_PARTO, ENCERRADO, INTERRUPCAO |
+| criado_em | DATETIME | ✅ | Data de cadastro |
+| criado_por | BIGINT | ✅ | Usuário que cadastrou |
+| atualizado_em | DATETIME | ❌ | Data da última atualização |
+| atualizado_por | BIGINT | ❌ | Usuário que atualizou |
+
+**Constraints:**
+
+- UNIQUE (vinculo_id) — 1 gestação por vínculo
+
+**Regras:**
+
+- Criada automaticamente com status = EM_ACOMPANHAMENTO
+- data_ultima_menstruacao e data_prevista_parto são opcionais — mulher pode não ter feito pré-natal, não saber a data, etc.
+- Pode ser atualizada posteriormente via endpoint próprio
+- Não é bloqueada por dados incompletos da Pessoa — apenas alertas são retornados
+
+10. GESTACAO_ACOMPANHAMENTO
+
+**Descrição:** Registros periódicos de evolução da gestação. Imutável após criação (sem UPDATE).
+
+**Campos:**
+
+| Campo | Tipo | Obrigatório | Descrição |
+| --- | --- | --- | --- |
+| id | BIGINT | ✅ | Identificador único |
+| gestacao_id | BIGINT | ✅ | FK para Gestacao |
+| data_registro | DATE | ✅ | Data do registro |
+| semanas_gestacao | INT | ❌ | Semanas de gestação |
+| numero_consultas | INT | ❌ | Consultas de pré-natal realizadas |
+| alto_risco | BOOLEAN | ✅ | Se é gravidez de alto risco |
+| motivo_alto_risco | VARCHAR(500) | ❌ | Obrigatório se alto_risco = true |
+| peso_kg | DECIMAL(5,2) | ❌ | Peso em kg |
+| pressao_arterial | VARCHAR(20) | ❌ | Ex: "120/80" |
+| observacoes | TEXT | ❌ | Observações do técnico |
+| criado_em | DATETIME | ✅ | Data de cadastro |
+| criado_por | BIGINT | ✅ | Usuário que cadastrou |
+
+**Regras:**
+
+- Sem endpoint de UPDATE — cada registro é um snapshot imutável
+- motivo_alto_risco obrigatório quando alto_risco = true
+
+11. PROGRAMA SOCIAL
 
 **Descrição:** Programas de transferência de renda e benefícios (ex: Bolsa Família, BPC).
 
@@ -502,7 +596,7 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 - 1:N com VinculoFamiliaPrograma
 - 1:N com Atendimento
 
-10. VINCULO_FAMILIA_PROGRAMA
+12. VINCULO_FAMILIA_PROGRAMA
 
 **Descrição:** Registra a participação de famílias em programas sociais.
 
@@ -524,7 +618,7 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 **Constraints:**
 - Unique: (familia_id, programa_id)
 
-11. PRONTUÁRIO
+13. PRONTUÁRIO
 
 **Descrição:** Registro de acompanhamento de uma família em um equipamento específico. Uma família pode ter múltiplos prontuários (em equipamentos diferentes).
 
@@ -556,7 +650,7 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 - Uma família pode ter prontuários simultâneos em diferentes equipamentos
 - Histórico nunca é deletado
 
-12. ATENDIMENTO
+14. ATENDIMENTO
 
 **Descrição:** Registro de cada atendimento/contato realizado. Pode ser individual (pessoa específica), familiar (toda a família), relacionado a um serviço ou a um programa social.
 
@@ -599,7 +693,7 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 - Atividade em grupo SCFV → servico_id preenchido
 - Orientação sobre Bolsa Família → programa_id preenchido
 
-13. ENCAMINHAMENTO
+15. ENCAMINHAMENTO
 
 **Descrição:** Registra o encaminhamento de uma família de um equipamento para outro.
 
@@ -634,7 +728,7 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 3. Se aceito, pode evoluir para CONCLUIDO
 
 
-14. AUDIT_LOG
+16. AUDIT_LOG
 
 **Descrição:** Tabela de auditoria que registra todas as operações (INSERT, UPDATE, DELETE) realizadas no sistema.
 
@@ -657,6 +751,8 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 - Registro automático via AuditService
 - Snapshots em formato JSON para flexibilidade
 - Nunca é deletado
+
+
 
 ## SEGURANÇA
 
@@ -943,7 +1039,7 @@ ADD CONSTRAINT fk_nome_tabela_outra
 | 1 | Apenas uma pessoa de referência por família | ✅ | Validado no Service |
 | 2 | Pessoa de referência deve ter endereço | ✅ | Validado no Service |
 | 3 | Parentesco é null quando is_referencia = true | ✅ | Validado no Service |
-| 4 | CPF único quando informado | ✅ | Constraint UNIQUE no banco |
+| 4 | CPF único quando informado | ✅ | Constraint UNIQUE |
 | 5 | Técnico vinculado a múltiplos equipamentos | ✅ | Tabela TecnicoEquipamento |
 | 6 | Histórico nunca é apagado | ✅ | Soft delete via status |
 | 7 | Família pode ter prontuários em múltiplos equipamentos | ✅ | Sem constraint UNIQUE |
@@ -953,12 +1049,18 @@ ADD CONSTRAINT fk_nome_tabela_outra
 | 11 | Validação de faixa etária em VinculoPessoaServico | ✅ | Validado no Service |
 | 12 | Não permitir vínculo duplicado ativo | ✅ | Constraint UNIQUE |
 | 13 | Todas as ações são auditadas | ✅ | AuditService centralizado |
-| 14 | Senhas nunca são salvas em texto puro | ✅ | BCrypt |
+| 14 | Senhas nunca salvas em texto puro | ✅ | BCrypt |
 | 15 | Todo usuário vinculado a um técnico | ✅ | FK obrigatória + UNIQUE |
-| 16 | Prontuário só pode ser criado por técnico vinculado ao equipamento | ✅ | Validado no Service |
-| 17 | Atendimento só pode ser registrado em prontuário ABERTO | ✅ | Validado no Service |
-| 18 | faixa_etaria_min <= faixa_etaria_max | ✅ | Constraint CHECK no banco |
-
+| 16 | Prontuário só criado por técnico vinculado ao equipamento | ✅ | Validado no Service |
+| 17 | Atendimento só em prontuário ABERTO | ✅ | Validado no Service |
+| 18 | faixa_etaria_min <= faixa_etaria_max | ✅ | Constraint CHECK |
+| 19 | Gestação vinculada 1:1 ao VinculoPessoaServico | 🔄 | Constraint UNIQUE no banco |
+| 20 | Acompanhamento de gestação é imutável (snapshot) | 🔄 | Sem endpoint de UPDATE |
+| 21 | motivo_alto_risco obrigatório quando alto_risco = true | 🔄 | Validado no Service |
+| 22 | Serviço GESTACAO cria Gestacao automaticamente ao vincular pessoa | 🔄 | Validado no Service |
+| 23 | Ao vincular em serviço especial, sistema alerta sobre dados faltantes da Pessoa | 🔄 | Não bloqueia — apenas alerta no response |
+| 24 | data_ultima_menstruacao e data_prevista_parto são opcionais na criação da Gestacao | ✅ | Decisão de negócio — realidade de campo |
+| 25 | tem_lista_presenca habilita geração de lista de chamada | 🔴 | Placeholder — próxima iteração |
 
 ## FRONTEND - DETALHAMENTO
 ### ESTRUTURA DE PASTAS
@@ -1011,6 +1113,26 @@ src/
 │   └── utils.ts
 ├── modules/                              # Módulos de negócio
 │   ├── atendimentos/
+│   │   ├── components/
+│   │   │   ├── FormAtendimento.tsx
+│   │   │   ├── FormAbrirProntuario.tsx
+│   │   │   ├── FormEncerrarProntuario.tsx
+│   │   │   ├── ProntuariosPage.tsx
+│   │   │   ├── SeletorPessoa.tsx
+│   │   │   ├── SeletorEquipamento.tsx
+│   │   │   └── SeletorServico.tsx
+│   │   ├── hooks/
+│   │   │   ├── useAtendimentos.ts
+│   │   │   ├── useProntuarios.ts
+│   │   │   ├── useEquipamentosDoTecnico.ts
+│   │   │   └── useServicosDoEquipamento.ts
+│   │   ├── services/
+│   │   │   ├── atendimentoService.ts
+│   │   │   └── prontuarioService.ts
+│   │   └── types/
+│   │       ├── atendimento.ts
+│   │       ├── prontuario.ts
+│   │       └── enums.ts
 │   ├── encaminhamentos/                  # Placeholder — não implementado
 │   ├── equipamentos/
 │   ├── familias/
@@ -1055,7 +1177,12 @@ const novo = await api<Equipamento>("/api/equipamentos", {
 ```
 
 ### GERENCIAMENTO DE ESTADO
- estado é gerenciado com hooks customizados usando useState + useCallback + useEffect.
+
+O projeto adota **dois padrões de gerenciamento de estado**, dependendo da natureza do módulo:
+
+**1. Módulos administrativos (CRUD simples)**
+
+Utilizam hooks customizados com `useState + useCallback + useEffect`.
 
 **Cada módulo possui três camadas de hooks:**
 | Hook | Responsabilidade | Exemplo |
@@ -1066,24 +1193,41 @@ const novo = await api<Equipamento>("/api/equipamentos", {
 
 **Fluxo de dados:**
 ```
-Page Component
-    └── use-[modulo]-page.ts       ← UI state (modais, busca, submitting)
-            └── use-[modulo].ts    ← Data state (lista, loading, error, CRUD)
-                    └── [modulo]-service.ts  ← Chamadas HTTP via api.ts
+Page Component └── use-[modulo]-page.ts ← UI state (modais, busca, submitting) └── use-[modulo].ts ← Data state (lista, loading, error, CRUD) └── [modulo]-service.ts ← Chamadas HTTP via api.ts
 ```
 
-**Exemplo — use-equipamentos.ts:**
-```typescript
-// Gerencia os dados: lista, loading, error + operações CRUD
-export function useEquipamentos() {
-  const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // carregar, criar, atualizar, mudarStatus...
-  return { equipamentos, loading, error, carregar, criar, atualizar, mudarStatus };
+**Módulos que seguem esse padrão:** Equipamentos, Técnicos, Usuários, Programas, Serviços, Famílias/Pessoas.
+
+**2. Módulos de fluxo clínico/histórico (dados reativos)**
+
+Utilizam **TanStack Query** diretamente nos hooks, sem a camada intermediária `use-[modulo]-page.ts`. O cache, invalidação e refetch são gerenciados pela própria lib, o que é mais adequado para dados que mudam com frequência e dependem de sincronização entre componentes (ex: lista de atendimentos após cadastro).
+
+**Estrutura:**
+```
+Component └── use[Modulo].ts (TanStack Query) ├── useQuery ← leitura (listar, buscar) └── useMutation ← escrita (cadastrar, atualizar, encerrar) └── [modulo]Service.ts ← Chamadas HTTP via api.ts
+```
+
+
+**Exemplo — `useProntuarios.ts`:**
+```typescript
+export function useProntuariosDaFamilia(familiaId: number) {
+  return useQuery({
+    queryKey: ['prontuarios', familiaId],
+    queryFn: () => prontuarioService.listarPorFamilia(familiaId),
+    enabled: !!familiaId,
+  })
 }
 
+export function useCadastrarProntuario() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (dto: ProntuarioCadastroDTO) => prontuarioService.cadastrar(dto),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['prontuarios', data.familiaId] })
+    },
+  })
+}
 ```
 
 **Exemplo — use-equipamentos-page.ts:**
@@ -1147,6 +1291,7 @@ if (formKey !== prevFormKey) {
 | Encaminhamentos | — | — | — | — | Não iniciado |
 | Vínculo Família/Programa | — | — | — | — | Não iniciado |
 | Vínculo Pessoa/Serviço | — | — | — | — | Não iniciado |
+| Gestação | 🔴 | 🔴 | 🔴 | 🔴 | Não iniciado |
 
 ### PADRÕES DE NOMENCLATURA (FRONTEND)
 | Tipo | Convenção | Exemplo |
@@ -1227,21 +1372,25 @@ spring.flyway.baseline-on-migrate=true
 ## MIGRATIONS APLICADAS
 | Versão | Descrição | Status |
 | --- | --- | --- |
-| V1 | Criar tabela equipamento | ✅ |
-| V2 | Criar tabela tecnico | ✅ |
-| V3 | Criar tabela tecnico_equipamento | ✅ |
-| V4 | Criar tabela usuario | ✅ |
-| V5 | Criar tabela familia | ✅ |
-| V6 | Criar tabela pessoa | ✅ |
-| V7 | Criar tabela prontuario | ✅ |
-| V8 | Criar tabela atendimento | ✅ |
-| V9 | Criar tabela encaminhamento | ✅ |
-| V10 | Criar tabela servicos | ✅ |
-| V11 | Criar tabela vinculo_pessoa_servico | ✅ |
-| V12 | Adicionar servico_id e programa_id em atendimento | ✅ |
-| V13 | Criar tabela programa_social | ✅ |
-| V14 | Criar tabela vinculo_familia_programa | ✅ |
-| V15 | Criar tabela audit_log | ✅ |
+| V1 | Criação inicial (fora do Flyway) | ✅ |
+| V2 | Refactor familia/pessoa | ✅ |
+| V3 | Ajuste coluna criado_em em usuario | ✅ |
+| V4 | Update table equipamento | ✅ |
+| V5 | Update table usuario drop nome | ✅ |
+| V6 | Remove constraint referencia por familia | ✅ |
+| V7 | Add modalidade to atendimento | ✅ |
+| V8 | Create tecnico equipamento | ✅ |
+| V9 | Remover equipamento_id de tecnico | ✅ |
+| V10 | Insert table servico | ✅ |
+| V11 | Add motivo encerramento prontuario | ✅ |
+| V12 | Criar tabela vinculo_pessoa_servico | ✅ |
+| V13 | Adicionar servico e programa em atendimento | ✅ |
+| V14 | Criar tabela programa_social | ✅ |
+| V15 | Criar tabela vinculo_familia_programa | ✅ |
+| V16 | Criar tabela audit_log | ✅ |
+| V17 | Adicionar tem_lista_presenca e tipo_acompanhamento em servicos | ✅ |
+| V18 | Criar tabela gestacao | ✅ |
+| V19 | Criar tabela gestacao_acompanhamento | ✅ |
 
 ## ÍNDICES CRIADOS
 ### Performance otimizada para:
@@ -1443,7 +1592,7 @@ projeto/
 │   ├── package.json
 │   └── README.md
 └── docs/
-    ├── RESUMO_GERAL.md          ← Este documento
+    ├── RESUMO_GERAL.md
     ├── DIAGRAMA_ER.md
     ├── FLUXOS.md
     └── API.md

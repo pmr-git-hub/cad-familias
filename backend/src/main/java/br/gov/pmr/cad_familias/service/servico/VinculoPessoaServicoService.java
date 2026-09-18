@@ -2,10 +2,14 @@ package br.gov.pmr.cad_familias.service.servico;
 
 import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
 import br.gov.pmr.cad_familias.domain.familia.Pessoa;
+import br.gov.pmr.cad_familias.domain.gestacao.Gestacao;
 import br.gov.pmr.cad_familias.domain.programa.StatusVinculo;
 import br.gov.pmr.cad_familias.domain.servico.Servico;
+import br.gov.pmr.cad_familias.domain.servico.TipoServico;
 import br.gov.pmr.cad_familias.domain.servico.VinculoPessoaServico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
+import br.gov.pmr.cad_familias.dto.gestacao.GestacaoRespostaDTO;
+import br.gov.pmr.cad_familias.dto.gestacao.VinculoComGestacaoRespostaDTO;
 import br.gov.pmr.cad_familias.dto.programa.VinculoDesligamentoRequest;
 import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoRequest;
 import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoResponse;
@@ -16,10 +20,12 @@ import br.gov.pmr.cad_familias.repository.servico.ServicoRepository;
 import br.gov.pmr.cad_familias.repository.servico.VinculoPessoaServicoRepository;
 import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
 import br.gov.pmr.cad_familias.service.audit.AuditService;
+import br.gov.pmr.cad_familias.service.gestacao.GestacaoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +38,7 @@ public class VinculoPessoaServicoService {
     private final VinculoPessoaServicoMapper mapper;
     private final AuditService auditService;
     private final UsuarioRepository usuarioRepository;
+    private final GestacaoService gestacaoService;
 
     public VinculoPessoaServicoService(
             VinculoPessoaServicoRepository vinculoRepository,
@@ -39,7 +46,8 @@ public class VinculoPessoaServicoService {
             ServicoRepository servicoRepository,
             VinculoPessoaServicoMapper mapper,
             AuditService auditService,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            GestacaoService gestacaoService
     ) {
         this.vinculoRepository = vinculoRepository;
         this.pessoaRepository = pessoaRepository;
@@ -47,10 +55,11 @@ public class VinculoPessoaServicoService {
         this.mapper = mapper;
         this.auditService = auditService;
         this.usuarioRepository = usuarioRepository;
+        this.gestacaoService = gestacaoService;
     }
 
     @Transactional
-    public VinculoPessoaServicoResponse vincular(VinculoPessoaServicoRequest request, Long usuarioId) {
+    public VinculoComGestacaoRespostaDTO vincular(VinculoPessoaServicoRequest request, Long usuarioId) {
         Pessoa pessoa = pessoaRepository.findById(request.getPessoaId())
                 .orElseThrow(() -> new EntityNotFoundException("Pessoa não encontrada: " + request.getPessoaId()));
 
@@ -61,7 +70,6 @@ public class VinculoPessoaServicoService {
             throw new IllegalArgumentException("Não é possível vincular a um serviço inativo: " + servico.getNome());
         }
 
-        // Verifica se já existe vínculo ativo
         if (vinculoRepository.existsByPessoaIdAndServicoIdAndStatus(
                 request.getPessoaId(), request.getServicoId(), StatusVinculo.ATIVO)) {
             throw new IllegalArgumentException(
@@ -69,7 +77,6 @@ public class VinculoPessoaServicoService {
             );
         }
 
-        // Validação de faixa etária (se configurada no serviço)
         if (servico.getFaixaEtariaMin() != null || servico.getFaixaEtariaMax() != null) {
             int idade = pessoa.getIdade();
             if (servico.getFaixaEtariaMin() != null && idade < servico.getFaixaEtariaMin()) {
@@ -87,15 +94,11 @@ public class VinculoPessoaServicoService {
         VinculoPessoaServico entity = mapper.toEntity(request, pessoa, servico);
         entity.setCriadoPor(usuarioId);
 
-        // ✅ Salva
         VinculoPessoaServico entitySalva = vinculoRepository.save(entity);
-
-        // ✅ Converte
         VinculoPessoaServicoResponse resultado = mapper.toResponse(entitySalva);
 
-        // ✅ Auditoria (INSERT)
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNaoEncontradoException());
+                .orElseThrow(UsuarioNaoEncontradoException::new);
 
         auditService.registrar(
                 "vinculo_pessoa_servico",
@@ -106,7 +109,21 @@ public class VinculoPessoaServicoService {
                 usuario
         );
 
-        return resultado;
+        // ─── Fluxo especial por tipo de serviço ──────────────────────────────────
+        GestacaoRespostaDTO gestacaoDTO = null;
+        List<String> alertas = new ArrayList<>();
+
+        if (servico.getTipo() == TipoServico.GESTACAO) {
+            Gestacao gestacao = gestacaoService.criarAutomaticamente(entitySalva, usuarioId);
+            gestacaoDTO = GestacaoRespostaDTO.fromEntity(gestacao);
+            alertas.add("Acompanhamento de gestação iniciado automaticamente.");
+
+            if (pessoa.getIdade() < 18) {
+                alertas.add("ATENÇÃO: gestante menor de idade — verificar medidas de proteção.");
+            }
+        }
+
+        return new VinculoComGestacaoRespostaDTO(resultado, gestacaoDTO, alertas);
     }
 
     @Transactional

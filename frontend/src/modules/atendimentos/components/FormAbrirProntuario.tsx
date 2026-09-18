@@ -1,7 +1,7 @@
 // src/components/prontuario/FormAbrirProntuario.tsx
 
 import { useState } from 'react'
-import { useCadastrarProntuario } from '../hooks/useProntuarios' 
+import { useCadastrarProntuario } from '@/modules/atendimentos/hooks/useProntuarios'
 import { SeletorEquipamento } from './SeletorEquipamento'
 
 interface Props {

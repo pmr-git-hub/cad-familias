@@ -58,4 +58,9 @@ public class Servico {
 
     @Column(name = "atualizado_por")
     private Long atualizadoPor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", nullable = false, length = 50)
+    private TipoServico tipo = TipoServico.GERAL;
+
 }

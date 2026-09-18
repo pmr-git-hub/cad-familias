@@ -28,3 +28,4 @@ export function useCadastrarAtendimento(prontuarioId: number) {
     },
   })
 }
+

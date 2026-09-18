@@ -37,9 +37,9 @@ jwt:
 
 # Identidade do município — o que aparece na tela
 tenant:
-  nome: Ribeirão Pires
-  estado: SP
-  prefeitura: Prefeitura Municipal de Ribeirão Pires
+  nome: Ribeirão
+  estado: PE
+  prefeitura: Prefeitura Municipal de Ribeirão PE
   secretaria: Secretaria de Assistência Social
   logo: /assets/logo-ribeirao.png
   cor-primaria: "#1A3E6F"

@@ -1,5 +1,6 @@
 package br.gov.pmr.cad_familias.controller.servico;
 
+import br.gov.pmr.cad_familias.dto.gestacao.VinculoComGestacaoRespostaDTO;
 import br.gov.pmr.cad_familias.dto.programa.VinculoDesligamentoRequest;
 import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoRequest;
 import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoResponse;
@@ -24,13 +25,15 @@ public class VinculoPessoaServicoController {
     }
 
     @PostMapping
-    public ResponseEntity<VinculoPessoaServicoResponse> vincular(
+    public ResponseEntity<VinculoComGestacaoRespostaDTO> vincular(
             @Valid @RequestBody VinculoPessoaServicoRequest request,
             @UsuarioLogado Long usuarioId,
             UriComponentsBuilder uriBuilder
     ) {
-        VinculoPessoaServicoResponse resposta = service.vincular(request, usuarioId);
-        var uri = uriBuilder.path("/api/vinculos-servico/{id}").buildAndExpand(resposta.getId()).toUri();
+        VinculoComGestacaoRespostaDTO resposta = service.vincular(request, usuarioId);
+        var uri = uriBuilder.path("/api/vinculos-servico/{id}")
+                .buildAndExpand(resposta.vinculo().getId())
+                .toUri();
         return ResponseEntity.created(uri).body(resposta);
     }
 

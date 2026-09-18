@@ -1,0 +1,4 @@
+ALTER TABLE servicos
+    ADD COLUMN tem_lista_presenca BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN tipo_acompanhamento ENUM('NENHUM', 'GESTACAO', 'MSE', 'TRABALHO_INFANTIL')
+        NOT NULL DEFAULT 'NENHUM';

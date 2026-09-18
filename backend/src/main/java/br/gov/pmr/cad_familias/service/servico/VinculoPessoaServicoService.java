@@ -5,7 +5,7 @@ import br.gov.pmr.cad_familias.domain.familia.Pessoa;
 import br.gov.pmr.cad_familias.domain.gestacao.Gestacao;
 import br.gov.pmr.cad_familias.domain.programa.StatusVinculo;
 import br.gov.pmr.cad_familias.domain.servico.Servico;
-import br.gov.pmr.cad_familias.domain.servico.TipoServico;
+import br.gov.pmr.cad_familias.domain.servico.TipoAcompanhamento;
 import br.gov.pmr.cad_familias.domain.servico.VinculoPessoaServico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.gestacao.GestacaoRespostaDTO;
@@ -113,7 +113,7 @@ public class VinculoPessoaServicoService {
         GestacaoRespostaDTO gestacaoDTO = null;
         List<String> alertas = new ArrayList<>();
 
-        if (servico.getTipo() == TipoServico.GESTACAO) {
+        if (servico.getTipoAcompanhamento() == TipoAcompanhamento.GESTACAO) {
             Gestacao gestacao = gestacaoService.criarAutomaticamente(entitySalva, usuarioId);
             gestacaoDTO = GestacaoRespostaDTO.fromEntity(gestacao);
             alertas.add("Acompanhamento de gestação iniciado automaticamente.");

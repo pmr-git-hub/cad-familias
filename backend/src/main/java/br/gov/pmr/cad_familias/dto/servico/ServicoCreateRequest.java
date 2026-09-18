@@ -1,5 +1,6 @@
 package br.gov.pmr.cad_familias.dto.servico;
 
+import br.gov.pmr.cad_familias.domain.servico.TipoAcompanhamento;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,10 @@ public class ServicoCreateRequest {
     @Min(value = 0, message = "Faixa etária mínima não pode ser negativa")
     private Integer faixaEtariaMin;
 
+    private Boolean temListaPresenca;
+
+    private TipoAcompanhamento tipoAcompanhamento;
+
     @Min(value = 0, message = "Faixa etária máxima não pode ser negativa")
     private Integer faixaEtariaMax;
 
@@ -36,4 +41,5 @@ public class ServicoCreateRequest {
     private String horario;
 
     private Boolean ativo;
+
 }

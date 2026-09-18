@@ -60,7 +60,11 @@ public class Servico {
     private Long atualizadoPor;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo", nullable = false, length = 50)
-    private TipoServico tipo = TipoServico.GERAL;
+    @Column(name = "tipo_acompanhamento", nullable = false, length = 50)
+    private TipoAcompanhamento tipoAcompanhamento = TipoAcompanhamento.GERAL;
+
+    @Column(name = "tem_lista_presenca", nullable = false)
+    private boolean temListaPresenca = false;
+
 
 }

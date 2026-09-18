@@ -1,5 +1,14 @@
 // modules/servicos/types/servico.ts
 
+export type TipoAcompanhamento = "GERAL" | "GESTACAO" | "MSE" | "TRABALHO_INFANTIL";
+
+export const TIPO_ACOMPANHAMENTO_LABELS: Record<TipoAcompanhamento, string> = {
+  GERAL: "Geral",
+  GESTACAO: "Gestação",
+  MSE: "Medida Socioeducativa",
+  TRABALHO_INFANTIL: "Trabalho Infantil",
+};
+
 export interface Servico {
   id: number;
   equipamentoId: number;
@@ -10,6 +19,8 @@ export interface Servico {
   faixaEtariaMax: number | null;
   diaSemana: string | null;
   horario: string | null;
+  temListaPresenca: boolean;
+  tipoAcompanhamento: TipoAcompanhamento;
   ativo: boolean;
   criadoEm: string;
   criadoPor: number;
@@ -26,6 +37,8 @@ export interface ServicoCadastroDTO {
   faixaEtariaMax?: number;
   diaSemana?: string;
   horario?: string;
+  temListaPresenca?: boolean;
+  tipoAcompanhamento?: TipoAcompanhamento;
   ativo?: boolean;
 }
 
@@ -38,6 +51,8 @@ export interface ServicoAtualizacaoDTO {
   faixaEtariaMax?: number;
   diaSemana?: string;
   horario?: string;
+  temListaPresenca?: boolean;
+  tipoAcompanhamento?: TipoAcompanhamento;
   ativo?: boolean;
 }
 
@@ -50,4 +65,6 @@ export interface ServicoFormData {
   faixaEtariaMax: string;
   diaSemana: string;
   horario: string;
+  temListaPresenca: boolean;
+  tipoAcompanhamento: TipoAcompanhamento;
 }

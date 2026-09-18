@@ -1,5 +1,6 @@
 package br.gov.pmr.cad_familias.dto.servico;
 
+import br.gov.pmr.cad_familias.domain.servico.TipoAcompanhamento;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,4 +24,6 @@ public class ServicoResponse {
     private Long criadoPor;
     private LocalDateTime atualizadoEm;
     private Long atualizadoPor;
+    private Boolean temListaDePresenca;
+    private TipoAcompanhamento tipoAcompanhamento;
 }

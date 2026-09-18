@@ -59,15 +59,14 @@ export function useServicosPage() {
         nome: data.nome,
         descricao: data.descricao || undefined,
         publicoAlvo: data.publicoAlvo || undefined,
-        faixaEtariaMin: data.faixaEtariaMin
-          ? parseInt(data.faixaEtariaMin)
-          : undefined,
-        faixaEtariaMax: data.faixaEtariaMax
-          ? parseInt(data.faixaEtariaMax)
-          : undefined,
+        faixaEtariaMin: data.faixaEtariaMin ? parseInt(data.faixaEtariaMin) : undefined,
+        faixaEtariaMax: data.faixaEtariaMax ? parseInt(data.faixaEtariaMax) : undefined,
         diaSemana: data.diaSemana || undefined,
         horario: data.horario || undefined,
+        temListaPresenca: data.temListaPresenca,
+        tipoAcompanhamento: data.tipoAcompanhamento,
       };
+
 
       if (editando) {
         await atualizar(editando.id, payload);

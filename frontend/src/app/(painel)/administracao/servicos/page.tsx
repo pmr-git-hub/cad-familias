@@ -18,6 +18,7 @@ import { ServicoForm } from "@/modules/servicos/components/servico-form";
 import { ServicoModalMudarStatus } from "@/modules/servicos/components/servico-modal-mudar-status";
 import { useServicosPage } from "@/modules/servicos/hooks/use-servicos-page";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TIPO_ACOMPANHAMENTO_LABELS } from "@/modules/servicos/types/servico";
 
 export default function ServicosPage() {
   const {
@@ -129,6 +130,9 @@ export default function ServicosPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 hidden md:table-cell">
                   Público-alvo
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 hidden md:table-cell">
+                  Tipo
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 hidden lg:table-cell">
                   Faixa Etária
                 </th>
@@ -157,6 +161,11 @@ export default function ServicosPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell">
                     {servico.publicoAlvo || "—"}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell">
+                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700">
+                      {TIPO_ACOMPANHAMENTO_LABELS[servico.tipoAcompanhamento]}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 hidden lg:table-cell">
                     {formatFaixaEtaria(

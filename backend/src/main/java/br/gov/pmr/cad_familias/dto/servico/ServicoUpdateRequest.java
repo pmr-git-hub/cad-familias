@@ -1,5 +1,6 @@
 package br.gov.pmr.cad_familias.dto.servico;
 
+import br.gov.pmr.cad_familias.domain.servico.TipoAcompanhamento;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -32,4 +33,8 @@ public class ServicoUpdateRequest {
     private String horario;
 
     private Boolean ativo;
+
+    private Boolean temListaPresenca;
+
+    private TipoAcompanhamento tipoAcompanhamento;
 }

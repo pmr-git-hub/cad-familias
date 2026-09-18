@@ -19,6 +19,8 @@ public class ServicoMapper {
         entity.setFaixaEtariaMax(request.getFaixaEtariaMax());
         entity.setDiaSemana(request.getDiaSemana());
         entity.setHorario(request.getHorario());
+        entity.setTipoAcompanhamento(request.getTipoAcompanhamento());
+        entity.setTemListaPresenca(request.getTemListaPresenca());
         entity.setAtivo(request.getAtivo() != null ? request.getAtivo() : true);
         return entity;
     }
@@ -51,6 +53,12 @@ public class ServicoMapper {
         if (request.getAtivo() != null) {
             entity.setAtivo(request.getAtivo());
         }
+        if(request.getTemListaPresenca() != null){
+            entity.setTemListaPresenca((request.getTemListaPresenca()));
+        }
+        if(request.getTipoAcompanhamento() != null){
+            entity.setTipoAcompanhamento(request.getTipoAcompanhamento());
+        }
     }
 
     public ServicoResponse toResponse(Servico entity) {
@@ -69,6 +77,8 @@ public class ServicoMapper {
         r.setCriadoPor(entity.getCriadoPor());
         r.setAtualizadoEm(entity.getAtualizadoEm());
         r.setAtualizadoPor(entity.getAtualizadoPor());
+        r.setTemListaDePresenca(entity.isTemListaPresenca());
+        r.setTipoAcompanhamento(entity.getTipoAcompanhamento());
         return r;
     }
 }

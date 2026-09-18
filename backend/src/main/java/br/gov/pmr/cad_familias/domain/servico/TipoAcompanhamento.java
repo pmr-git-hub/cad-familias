@@ -1,6 +1,6 @@
 package br.gov.pmr.cad_familias.domain.servico;
 
-public enum TipoServico {
+public enum TipoAcompanhamento {
     GERAL,
     GESTACAO,
     SAUDE_MENTAL,

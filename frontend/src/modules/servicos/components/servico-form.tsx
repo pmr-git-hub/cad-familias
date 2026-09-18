@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, Check } from "lucide-react";
-import type { Servico, ServicoFormData } from "../types/servico";
+import { Servico, ServicoFormData,  TipoAcompanhamento, TIPO_ACOMPANHAMENTO_LABELS } from "../types/servico";
 
 interface EquipamentoOption {
   id: number;
@@ -52,6 +52,13 @@ function ServicoFormContent({
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  const [temListaPresenca, setTemListaPresenca] = useState(
+    servico?.temListaPresenca ?? false
+  );
+  const [tipoAcompanhamento, setTipoAcompanhamento] = useState<TipoAcompanhamento>(
+    servico?.tipoAcompanhamento ?? "GERAL"
+  );
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (
@@ -90,6 +97,7 @@ function ServicoFormContent({
 
     if (!equipamentoId) return;
 
+   // Dentro do handleSubmit, adicionar ao objeto passado para onSubmit:
     onSubmit({
       equipamentoId,
       nome,
@@ -99,7 +107,10 @@ function ServicoFormContent({
       faixaEtariaMax,
       diaSemana,
       horario,
+      temListaPresenca,
+      tipoAcompanhamento,
     });
+
   }
 
   return (
@@ -229,6 +240,46 @@ function ServicoFormContent({
               onChange={(e) => setPublicoAlvo(e.target.value)}
               placeholder="Ex: Crianças de 6 a 15 anos"
             />
+          </div>
+
+          {/* Tipo de Acompanhamento */}
+          <div className="space-y-1.5">
+            <Label htmlFor="tipoAcompanhamento">Tipo de Acompanhamento</Label>
+            <select
+              id="tipoAcompanhamento"
+              value={tipoAcompanhamento}
+              onChange={(e) => setTipoAcompanhamento(e.target.value as TipoAcompanhamento)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              {(Object.entries(TIPO_ACOMPANHAMENTO_LABELS) as [TipoAcompanhamento, string][]).map(
+                ([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                )
+              )}
+            </select>
+            {tipoAcompanhamento !== "GERAL" && (
+              <p className="text-xs text-blue-600">
+                Ao vincular uma pessoa a este serviço, o módulo de{" "}
+                <strong>{TIPO_ACOMPANHAMENTO_LABELS[tipoAcompanhamento]}</strong> será
+                criado automaticamente.
+              </p>
+            )}
+          </div>
+
+          {/* Lista de Presença */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="temListaPresenca"
+              checked={temListaPresenca}
+              onChange={(e) => setTemListaPresenca(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+            <Label htmlFor="temListaPresenca" className="cursor-pointer font-normal">
+              Habilitar lista de presença
+            </Label>
           </div>
 
           {/* Faixa etária */}

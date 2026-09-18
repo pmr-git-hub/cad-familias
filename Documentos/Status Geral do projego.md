@@ -193,8 +193,8 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 | Atendimento | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 100% |
 | Encaminhamento | ✅ | ✅* | ✅ | ✅ | ✅ | ✅ | 100% |
 | AuditLog | ✅ | ✅ | ✅ | — | ✅ | — | 100% |
-| Gestacao | 🔄 | 🔄 | 🔄 | 🔄 | ✅ | 🔄* | Em desenvolvimento |
-| GestacaoAcompanhamento | 🔄 | 🔄 | 🔄 | 🔄 | ✅ | 🔄 | Em desenvolvimento |
+| Gestacao | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Em desenvolvimento |
+| GestacaoAcompanhamento | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Em desenvolvimento |
 
 ### FRONTEND - CRUD IMPLEMENTADOS
 
@@ -209,6 +209,8 @@ Sistema de **Gestão Socioassistencial** desenvolvido para acompanhamento de fam
 | Prontuário | 🔄* | 🔄 | 🔄 | — | Em desenvolvimento |
 | Atendimento | 🔄 | 🔄 | — | — | Em desenvolvimento |
 | Gestação | 🔴 | 🔴 | 🔴* | — | Não iniciado |
+| Vínculo Pessoa/Serviço | 🔴 | 🔴 | 🔴 | — | Não iniciado |
+
 
 **Legenda:**
 
@@ -1292,6 +1294,7 @@ if (formKey !== prevFormKey) {
 | Vínculo Família/Programa | — | — | — | — | Não iniciado |
 | Vínculo Pessoa/Serviço | — | — | — | — | Não iniciado |
 | Gestação | 🔴 | 🔴 | 🔴 | 🔴 | Não iniciado |
+| Vínculo Pessoa/Serviço | 🔴 | 🔴 | 🔴 | 🔴 | Não iniciado |
 
 ### PADRÕES DE NOMENCLATURA (FRONTEND)
 | Tipo | Convenção | Exemplo |

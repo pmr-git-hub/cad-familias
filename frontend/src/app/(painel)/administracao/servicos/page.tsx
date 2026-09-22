@@ -12,10 +12,12 @@ import {
   PowerOff,
   Shapes,
   Loader2,
+  Users,
 } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ServicoForm } from "@/modules/servicos/components/servico-form";
 import { ServicoModalMudarStatus } from "@/modules/servicos/components/servico-modal-mudar-status";
+import { ServicoModalVincularPessoas } from "@/modules/servicos/components/servico-modal-vincular-pessoas";
 import { useServicosPage } from "@/modules/servicos/hooks/use-servicos-page";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TIPO_ACOMPANHAMENTO_LABELS } from "@/modules/servicos/types/servico";
@@ -29,6 +31,7 @@ export default function ServicosPage() {
     formOpen,
     editando,
     mudandoStatus,
+    vinculando,
     submitting,
     equipamentoOpcoes,
     setBusca,
@@ -39,6 +42,8 @@ export default function ServicosPage() {
     handleMudarStatus,
     handleFecharForm,
     handleFecharMudarStatus,
+    handleAbrirVincular,
+    handleFecharVincular,
     getEquipamentoNome,
     formatFaixaEtaria,
   } = useServicosPage();
@@ -142,6 +147,9 @@ export default function ServicosPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Status
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Vinculados
+                </th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                   Ações
                 </th>
@@ -181,8 +189,29 @@ export default function ServicosPage() {
                   <td className="px-6 py-4">
                     <StatusBadge ativo={servico.ativo} />
                   </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => handleAbrirVincular(servico)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                        servico.totalPessoasVinculadas > 0
+                          ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                          : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                      }`}
+                    >
+                      <Users className="h-3.5 w-3.5" />
+                      {servico.totalPessoasVinculadas ?? 0}
+                    </button>
+                  </td>
+
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleAbrirVincular(servico)}
+                        className="rounded-lg p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+                        title="Vincular pessoas"
+                      >
+                        <Users className="h-4 w-4" />
+                      </button>
                       <button
                         onClick={() => handleEditar(servico)}
                         className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
@@ -232,6 +261,12 @@ export default function ServicosPage() {
         onClose={handleFecharMudarStatus}
         onConfirm={handleMudarStatus}
         loading={submitting}
+      />
+
+      <ServicoModalVincularPessoas
+        servico={vinculando}
+        open={!!vinculando}
+        onClose={handleFecharVincular}
       />
     </div>
   );

@@ -11,8 +11,7 @@ import br.gov.pmr.cad_familias.domain.usuario.Usuario;
 import br.gov.pmr.cad_familias.dto.gestacao.GestacaoRespostaDTO;
 import br.gov.pmr.cad_familias.dto.gestacao.VinculoComGestacaoRespostaDTO;
 import br.gov.pmr.cad_familias.dto.programa.VinculoDesligamentoRequest;
-import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoRequest;
-import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoResponse;
+import br.gov.pmr.cad_familias.dto.servico.*;
 import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.mapper.servico.VinculoPessoaServicoMapper;
 import br.gov.pmr.cad_familias.repository.familia.PessoaRepository;
@@ -23,6 +22,7 @@ import br.gov.pmr.cad_familias.service.audit.AuditService;
 import br.gov.pmr.cad_familias.service.gestacao.GestacaoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -126,12 +126,44 @@ public class VinculoPessoaServicoService {
         return new VinculoComGestacaoRespostaDTO(resultado, gestacaoDTO, alertas);
     }
 
+
+    @Transactional
+    public VinculoLoteRespostaDTO vincularEmLote(VinculoPessoaServicoLoteRequest request, Long usuarioId) {
+        List<VinculoComGestacaoRespostaDTO> sucesso = new ArrayList<>();
+        List<VinculoLoteFalhaDTO> falhas = new ArrayList<>();
+
+        for (Long pessoaId : request.getPessoaIds()) {
+            try {
+                VinculoPessoaServicoRequest individual = new VinculoPessoaServicoRequest();
+                individual.setPessoaId(pessoaId);
+                individual.setServicoId(request.getServicoId());
+                individual.setDataEntrada(request.getDataEntrada());
+
+                // executa em transação independente para não derrubar o lote todo
+                VinculoComGestacaoRespostaDTO resultado = vincularIndividualIsolado(individual, usuarioId);
+                sucesso.add(resultado);
+            } catch (Exception e) {
+                String nomePessoa = pessoaRepository.findById(pessoaId)
+                        .map(Pessoa::getNome)
+                        .orElse("Pessoa #" + pessoaId);
+                falhas.add(new VinculoLoteFalhaDTO(pessoaId, nomePessoa, e.getMessage()));
+            }
+        }
+
+        return new VinculoLoteRespostaDTO(sucesso, falhas);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public VinculoComGestacaoRespostaDTO vincularIndividualIsolado(VinculoPessoaServicoRequest request, Long usuarioId) {
+        return vincular(request, usuarioId);
+    }
+
+
     @Transactional
     public VinculoPessoaServicoResponse desligar(Long vinculoId, VinculoDesligamentoRequest request, Long usuarioId) {
         VinculoPessoaServico entity = vinculoRepository.findById(vinculoId)
                 .orElseThrow(() -> new EntityNotFoundException("Vínculo não encontrado: " + vinculoId));
 
-        // ✅ Estado ANTES
         VinculoPessoaServicoResponse estadoAnterior = mapper.toResponse(entity);
 
         if (entity.getStatus() != StatusVinculo.ATIVO) {

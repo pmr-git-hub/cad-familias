@@ -2,6 +2,8 @@ package br.gov.pmr.cad_familias.controller.servico;
 
 import br.gov.pmr.cad_familias.dto.gestacao.VinculoComGestacaoRespostaDTO;
 import br.gov.pmr.cad_familias.dto.programa.VinculoDesligamentoRequest;
+import br.gov.pmr.cad_familias.dto.servico.VinculoLoteRespostaDTO;
+import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoLoteRequest;
 import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoRequest;
 import br.gov.pmr.cad_familias.dto.servico.VinculoPessoaServicoResponse;
 import br.gov.pmr.cad_familias.infra.seguranca.usuario.UsuarioLogado;
@@ -94,4 +96,13 @@ public class VinculoPessoaServicoController {
     ) {
         return ResponseEntity.ok(service.listarAtivosPorServico(servicoId));
     }
+
+    @PostMapping("/lote")
+    public ResponseEntity<VinculoLoteRespostaDTO> vincularEmLote(
+            @Valid @RequestBody VinculoPessoaServicoLoteRequest request,
+            @UsuarioLogado Long usuarioId
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.vincularEmLote(request, usuarioId));
+    }
+
 }

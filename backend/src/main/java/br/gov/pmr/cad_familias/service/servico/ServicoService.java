@@ -3,12 +3,14 @@ package br.gov.pmr.cad_familias.service.servico;
 import br.gov.pmr.cad_familias.domain.audit.AcaoAudit;
 import br.gov.pmr.cad_familias.domain.servico.Servico;
 import br.gov.pmr.cad_familias.domain.usuario.Usuario;
+import br.gov.pmr.cad_familias.dto.servico.ContagemVinculoServico;
 import br.gov.pmr.cad_familias.dto.servico.ServicoCreateRequest;
 import br.gov.pmr.cad_familias.dto.servico.ServicoResponse;
 import br.gov.pmr.cad_familias.dto.servico.ServicoUpdateRequest;
 import br.gov.pmr.cad_familias.excecao.UsuarioNaoEncontradoException;
 import br.gov.pmr.cad_familias.mapper.servico.ServicoMapper;
 import br.gov.pmr.cad_familias.repository.servico.ServicoRepository;
+import br.gov.pmr.cad_familias.repository.servico.VinculoPessoaServicoRepository;
 import br.gov.pmr.cad_familias.repository.usuario.UsuarioRepository;
 import br.gov.pmr.cad_familias.service.audit.AuditService;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,15 +28,18 @@ public class ServicoService {
     private final ServicoMapper mapper;
     private final AuditService auditService;
     private final UsuarioRepository usuarioRepository;
+    private final VinculoPessoaServicoRepository vinculoRepository;
 
     public ServicoService(ServicoRepository repository,
                           ServicoMapper mapper,
                           AuditService auditService,
-                          UsuarioRepository usuarioRepository) {
+                          UsuarioRepository usuarioRepository,
+                          VinculoPessoaServicoRepository vinculoRepository) {
         this.repository = repository;
         this.mapper = mapper;
         this.auditService = auditService;
         this.usuarioRepository = usuarioRepository;
+        this.vinculoRepository = vinculoRepository;
     }
 
     @Transactional
@@ -127,42 +133,56 @@ public class ServicoService {
     public ServicoResponse buscarPorId(Long id) {
         Servico entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Serviço não encontrado: " + id));
-        return mapper.toResponse(entity);
+        ServicoResponse response = mapper.toResponse(entity);
+        response.setTotalPessoasVinculadas(vinculoRepository.contarAtivosPorServico().stream()
+                .filter(c -> c.getServicoId().equals(id))
+                .findFirst()
+                .map(c -> c.getTotal().intValue())
+                .orElse(0));
+        return response;
     }
+
 
     @Transactional(readOnly = true)
     public List<ServicoResponse> listarTodos() {
-        return repository.findAll().stream()
+        List<ServicoResponse> responses = repository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+        return enriquecerComContagem(responses);
     }
+
 
     @Transactional(readOnly = true)
     public List<ServicoResponse> listarAtivos() {
-        return repository.findByAtivoTrue().stream()
+        List<ServicoResponse> responses = repository.findByAtivoTrue().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+        return enriquecerComContagem(responses);
     }
 
     @Transactional(readOnly = true)
     public List<ServicoResponse> listarPorEquipamento(Long equipamentoId) {
-        return repository.findByEquipamentoId(equipamentoId).stream()
+        List<ServicoResponse> responses =  repository.findByEquipamentoId(equipamentoId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+
+        return enriquecerComContagem(responses);
     }
 
     @Transactional(readOnly = true)
     public List<ServicoResponse> listarAtivosPorEquipamento(Long equipamentoId) {
-        return repository.findByEquipamentoIdAndAtivoTrue(equipamentoId).stream()
+        List<ServicoResponse> responses =  repository.findByEquipamentoIdAndAtivoTrue(equipamentoId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+        return enriquecerComContagem(responses);
     }
 
     @Transactional(readOnly = true)
     public List<ServicoResponse> buscarPorNome(String nome) {
-        return repository.findByNomeContainingIgnoreCase(nome).stream()
+        List<ServicoResponse> responses =  repository.findByNomeContainingIgnoreCase(nome).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+        return enriquecerComContagem(responses);
     }
 
     @Transactional
@@ -203,5 +223,18 @@ public class ServicoService {
             throw new IllegalArgumentException(
                     "Faixa etária mínima (" + min + ") não pode ser maior que a máxima (" + max + ")");
         }
+    }
+
+    private List<ServicoResponse> enriquecerComContagem(List<ServicoResponse> responses) {
+        Map<Long, Integer> contagens = vinculoRepository.contarAtivosPorServico().stream()
+                .collect(Collectors.toMap(
+                        ContagemVinculoServico::getServicoId,
+                        c -> c.getTotal().intValue()
+                ));
+
+        responses.forEach(r ->
+                r.setTotalPessoasVinculadas(contagens.getOrDefault(r.getId(), 0)));
+
+        return responses;
     }
 }

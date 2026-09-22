@@ -13,6 +13,18 @@ export function useServicosPage() {
   const { equipamentos, loading: loadingEquipamentos } =
     useEquipamentosOpcoes();
 
+  const [vinculando, setVinculando] = useState<Servico | null>(null);
+
+  
+  function handleAbrirVincular(servico: Servico): void {
+    setVinculando(servico);
+  }
+
+  function handleFecharVincular(): void {
+    setVinculando(null);
+  }
+
+
   const [busca, setBusca] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editando, setEditando] = useState<Servico | null>(null);
@@ -125,6 +137,9 @@ export function useServicosPage() {
     mudandoStatus,
     submitting,
     equipamentoOpcoes,
+    vinculando,
+    handleAbrirVincular,
+    handleFecharVincular,
     setBusca,
     setMudandoStatus,
     handleNovo,

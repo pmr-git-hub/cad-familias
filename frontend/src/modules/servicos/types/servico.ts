@@ -26,6 +26,7 @@ export interface Servico {
   criadoPor: number;
   atualizadoEm: string | null;
   atualizadoPor: number | null;
+  totalPessoasVinculadas: number; // NOVO
 }
 
 export interface ServicoCadastroDTO {

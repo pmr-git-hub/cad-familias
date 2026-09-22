@@ -26,4 +26,6 @@ public class ServicoResponse {
     private Long atualizadoPor;
     private Boolean temListaDePresenca;
     private TipoAcompanhamento tipoAcompanhamento;
+
+    private int totalPessoasVinculadas;
 }
